@@ -1,6 +1,7 @@
 import Glass from '@/components/Glass';
 import HeightMap from '@/components/HeightMap';
 import {
+    Cloud,
     OrbitControls,
     PerspectiveCamera,
     Plane,
@@ -21,7 +22,15 @@ const Main = (props: MainProps) => {
     return (
         <>
             <Sky />
-
+            <Cloud
+                position={[0, 100, 0]}
+                color={'#ffffff'}
+                opacity={1}
+                speed={0.4}
+                width={50}
+                depth={0.3}
+                segments={300}
+            />
             {/* <Glass
                 position={[0, 10, 0]}
                 rotation={[Math.PI / 2, 0, 0]}
