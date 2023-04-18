@@ -1,3 +1,4 @@
+import HeightMap from '@/components/HeightMap';
 import {
     OrbitControls,
     PerspectiveCamera,
@@ -20,14 +21,11 @@ const Main = (props: MainProps) => {
         <>
             <Sky />
 
-            <Sphere
-                position={[0, 1, 0]}
-                args={[1, 32, 32]}
-                castShadow
-                receiveShadow>
+            <Sphere position={[0, 1, 0]} args={[1, 32, 32]}>
                 <meshStandardMaterial attach="material" color="white" />
             </Sphere>
-            <Plane
+            <HeightMap size={10} />
+            {/* <Plane
                 rotation={[-Math.PI / 2, 0, 0]}
                 args={[10, 10]}
                 receiveShadow>
@@ -36,7 +34,7 @@ const Main = (props: MainProps) => {
                     color="white"
                     side={THREE.DoubleSide}
                 />
-            </Plane>
+            </Plane> */}
 
             <PerspectiveCamera
                 makeDefault
