@@ -25,7 +25,7 @@ export default function App({ pageProps }: AppProps) {
                 />
             </Head>
             <Canvas shadows={'soft'}>
-                <ambientLight castShadow intensity={0.1} />
+                <ambientLight intensity={0.1} />
 
                 <directionalLight
                     intensity={0.5}

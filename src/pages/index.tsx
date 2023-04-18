@@ -1,3 +1,4 @@
+import Glass from '@/components/Glass';
 import HeightMap from '@/components/HeightMap';
 import {
     OrbitControls,
@@ -21,20 +22,12 @@ const Main = (props: MainProps) => {
         <>
             <Sky />
 
-            <Sphere position={[0, 1, 0]} args={[1, 32, 32]}>
-                <meshStandardMaterial attach="material" color="white" />
-            </Sphere>
+            {/* <Glass
+                position={[0, 10, 0]}
+                rotation={[Math.PI / 2, 0, 0]}
+                scale={[1, 1, 1]}
+            /> */}
             <HeightMap size={10} />
-            {/* <Plane
-                rotation={[-Math.PI / 2, 0, 0]}
-                args={[10, 10]}
-                receiveShadow>
-                <meshStandardMaterial
-                    attach="material"
-                    color="white"
-                    side={THREE.DoubleSide}
-                />
-            </Plane> */}
 
             <PerspectiveCamera
                 makeDefault

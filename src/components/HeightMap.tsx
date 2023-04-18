@@ -67,20 +67,12 @@ const HeightMap: React.FC<HeightMapProps> = ({ size = 200 }) => {
     }, [vertices, planeMesh, planeGeo]);
 
     return (
-        <mesh ref={planeMesh} castShadow={true} receiveShadow={true}>
+        <mesh ref={planeMesh} castShadow={false} receiveShadow={false}>
             <planeGeometry
                 args={[size, size, controls.resolution, controls.resolution]}
                 ref={planeGeo}
             />
-            {controls.wireframe ? (
-                <meshLambertMaterial
-                    wireframe={true}
-                    color={'white'}
-                    side={THREE.DoubleSide}
-                />
-            ) : (
-                <meshLambertMaterial color={'red'} side={THREE.DoubleSide} />
-            )}
+            <meshLambertMaterial color={'white'} side={THREE.DoubleSide} />
         </mesh>
     );
 };
