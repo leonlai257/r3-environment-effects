@@ -1,5 +1,6 @@
 import Glass from '@/components/Glass';
 import HeightMap from '@/components/HeightMap';
+import { WaterPlane } from '@/components/WaterPlane';
 import {
     Cloud,
     OrbitControls,
@@ -8,7 +9,7 @@ import {
     Sky,
     Sphere,
 } from '@react-three/drei';
-import { createRef, useState } from 'react';
+import { Suspense, createRef, useState } from 'react';
 
 export interface MainProps {}
 
@@ -17,10 +18,13 @@ const Main = (props: MainProps) => {
 
     const [fov] = useState(75);
 
+    const mapSize = 10;
+
     return (
         <>
-            <Sky />
-            {/* <Cloud
+            <Suspense fallback={null}>
+                <Sky />
+                {/* <Cloud
                 position={[0, 100, 0]}
                 color={'#ffffff'}
                 opacity={1}
@@ -29,12 +33,19 @@ const Main = (props: MainProps) => {
                 depth={0.3}
                 segments={300}
             /> */}
-            {/* <Glass
+                {/* <Glass
                 position={[0, 10, 0]}
                 rotation={[Math.PI / 2, 0, 0]}
                 scale={[1, 1, 1]}
             /> */}
-            <HeightMap size={10} />
+                <HeightMap size={mapSize} />
+                <WaterPlane
+                    size={mapSize}
+                    props={{
+                        position: [0, 3, 0],
+                    }}
+                />
+            </Suspense>
 
             <PerspectiveCamera
                 makeDefault
