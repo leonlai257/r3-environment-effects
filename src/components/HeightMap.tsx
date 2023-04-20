@@ -8,19 +8,19 @@ import useFlipPlaneOnX from '../hooks/useFlipPlaneOnX';
 export const DEFAULT_CONTROL_VALUES = {
     seed: 'react-three-fiber',
     resolution: {
-        value: 30,
+        value: 40,
         min: 1,
         max: 40,
         step: 1,
     },
     maxHeight: {
-        value: 3,
+        value: 3.5,
         min: 1,
         max: 5,
         step: 0.1,
     },
     frequency: {
-        value: 4,
+        value: 3,
         min: 0.1,
         max: 8,
         step: 0.1,

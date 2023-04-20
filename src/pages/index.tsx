@@ -8,13 +8,11 @@ import {
     Sky,
     Sphere,
 } from '@react-three/drei';
-import { useThree } from '@react-three/fiber';
 import { createRef, useState } from 'react';
-import * as THREE from 'three';
+
 export interface MainProps {}
 
 const Main = (props: MainProps) => {
-    const { camera } = useThree();
     const cameraRef = createRef();
 
     const [fov] = useState(75);
@@ -22,7 +20,7 @@ const Main = (props: MainProps) => {
     return (
         <>
             <Sky />
-            <Cloud
+            {/* <Cloud
                 position={[0, 100, 0]}
                 color={'#ffffff'}
                 opacity={1}
@@ -30,7 +28,7 @@ const Main = (props: MainProps) => {
                 width={50}
                 depth={0.3}
                 segments={300}
-            />
+            /> */}
             {/* <Glass
                 position={[0, 10, 0]}
                 rotation={[Math.PI / 2, 0, 0]}
