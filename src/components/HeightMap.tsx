@@ -10,7 +10,7 @@ export const DEFAULT_CONTROL_VALUES = {
     resolution: {
         value: 40,
         min: 1,
-        max: 40,
+        max: 100,
         step: 1,
     },
     maxHeight: {

@@ -14,7 +14,7 @@ extend({ Water });
 declare global {
     namespace JSX {
         interface IntrinsicElements {
-            water: THREE.Mesh;
+            water: ThreeElements['mesh'];
         }
     }
 }
