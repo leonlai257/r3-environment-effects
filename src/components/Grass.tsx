@@ -89,7 +89,7 @@ export default function Grass({
     );
 }
 
-function getAttributeData(instances, width: number) {
+function getAttributeData(instances: number, width: number) {
     const offsets = [];
     const orientations = [];
     const stretches = [];

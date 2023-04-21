@@ -47,7 +47,7 @@ export const WaterPlane = ({ size, props }: WaterPlaneProps) => {
             waterColor: 0x001e0f,
             distortionScale: 3.7,
             fog: false,
-            format: gl.encoding,
+            format: gl.outputEncoding,
         }),
         [waterNormals]
     );
