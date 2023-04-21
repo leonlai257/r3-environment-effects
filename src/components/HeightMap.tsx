@@ -37,7 +37,6 @@ export const DEFAULT_CONTROL_VALUES = {
         max: 6,
         step: 1,
     },
-    wireframe: false,
 };
 
 interface HeightMapProps {

@@ -1,4 +1,5 @@
 import Glass from '@/components/Glass';
+import Grass from '@/components/Grass';
 import HeightMap from '@/components/HeightMap';
 import { WaterPlane } from '@/components/WaterPlane';
 import {
@@ -38,6 +39,7 @@ const Main = (props: MainProps) => {
                 rotation={[Math.PI / 2, 0, 0]}
                 scale={[1, 1, 1]}
             /> */}
+                <Grass />
                 <HeightMap size={mapSize} />
                 <WaterPlane
                     size={mapSize}
