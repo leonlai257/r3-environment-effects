@@ -5,6 +5,14 @@ import * as SimplexNoise from 'simplex-noise';
 import { useFrame, useLoader } from '@react-three/fiber';
 import './GrassMaterial';
 
+declare global {
+    namespace JSX {
+        interface IntrinsicElements {
+            grassMaterial: THREE.ShaderMaterial;
+        }
+    }
+}
+
 const noise2D = SimplexNoise.createNoise2D();
 
 export default function Grass({
@@ -14,7 +22,7 @@ export default function Grass({
     ...props
 }) {
     const { bW, bH, joints } = options;
-    const materialRef = useRef();
+    const materialRef = useRef<THREE.ShaderMaterial>(null!);
 
     const bladeDiffuse = '/textures/grassBladeDiffuse.jpg';
     const bladeAlpha = '/textures/grassBladeAlpha.jpg';
@@ -31,17 +39,6 @@ export default function Grass({
             new THREE.PlaneGeometry(bW, bH, 1, joints).translate(0, bH / 2, 0),
         [options]
     );
-    // const groundGeo = useMemo(() => {
-    //     const geo = new THREE.PlaneGeometry(width, width, 32, 32);
-    //     geo.verticesNeedUpdate = true;
-    //     geo.lookAt(new THREE.Vector3(0, 1, 0));
-    //     for (let i = 0; i < geo.vertices.length; i++) {
-    //         const v = geo.vertices[i];
-    //         v.y = getYPosition(v.x, v.z);
-    //     }
-    //     geo.computeVertexNormals();
-    //     return geo.toBufferGeometry();
-    // }, [width]);
     useFrame(
         (state) =>
             (materialRef.current.uniforms.time.value =
@@ -88,14 +85,11 @@ export default function Grass({
                     toneMapped={false}
                 />
             </mesh>
-            {/* <mesh position={[0, 0, 0]} geometry={groundGeo}>
-                <meshStandardMaterial color="#000f00" />
-            </mesh> */}
         </group>
     );
 }
 
-function getAttributeData(instances, width) {
+function getAttributeData(instances, width: number) {
     const offsets = [];
     const orientations = [];
     const stretches = [];

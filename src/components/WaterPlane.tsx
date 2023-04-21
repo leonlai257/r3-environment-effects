@@ -52,7 +52,10 @@ export const WaterPlane = ({ size, props }: WaterPlaneProps) => {
         [waterNormals]
     );
     useFrame(
-        (state, delta) => (ref.current.material.uniforms.time.value += delta)
+        (state, delta) =>
+            ((
+                ref.current.material as THREE.ShaderMaterial
+            ).uniforms.time.value += delta)
     );
     return (
         <water
