@@ -1,79 +1,99 @@
-import React, { useEffect, useRef } from 'react';
-import { useControls } from 'leva';
-import * as THREE from 'three';
-import useNoisyVertices from '../hooks/useNoisyVertices';
-import { BufferAttribute } from 'three';
-import useFlipPlaneOnX from '../hooks/useFlipPlaneOnX';
-
-export const DEFAULT_CONTROL_VALUES = {
-    seed: 'react-three-fiber',
-    resolution: {
-        value: 40,
-        min: 1,
-        max: 100,
-        step: 1,
-    },
-    maxHeight: {
-        value: 3.5,
-        min: 1,
-        max: 5,
-        step: 0.1,
-    },
-    frequency: {
-        value: 3,
-        min: 0.1,
-        max: 8,
-        step: 0.1,
-    },
-    exponent: {
-        value: 3,
-        min: 1,
-        max: 4.5,
-        step: 0.25,
-    },
-    octaves: {
-        value: 2,
-        min: 1,
-        max: 6,
-        step: 1,
-    },
-};
+import React, { useEffect, useMemo, useRef } from "react";
+import { useControls } from "leva";
+import * as THREE from "three";
+import useNoisyVertices from "../hooks/useNoisyVertices";
+import { BufferAttribute } from "three";
+import useFlipPlaneOnX from "../hooks/useFlipPlaneOnX";
+import Grass, { getAttributeData } from "./Grass";
+import { useLoader } from "@react-three/fiber";
 
 interface HeightMapProps {
-    size?: number;
+  config: any;
+  size?: number;
 }
 
-const HeightMap: React.FC<HeightMapProps> = ({ size = 200 }) => {
-    const controls = useControls(DEFAULT_CONTROL_VALUES);
-    const planeMesh = useRef<THREE.Mesh>(null);
-    const planeGeo = useRef<THREE.PlaneGeometry>(null);
-    useFlipPlaneOnX(planeMesh);
+const HeightMap: React.FC<HeightMapProps> = ({ size = 200, config }) => {
+  const controls = useControls(config);
+  const planeMesh = useRef<THREE.Mesh>(null);
+  const planeGeom = useRef<THREE.PlaneGeometry>(null);
+  useFlipPlaneOnX(planeMesh);
 
-    const vertices = useNoisyVertices(controls, {
-        ...controls,
-    });
+  const vertices = useNoisyVertices(controls, {
+    ...controls,
+  });
 
-    useEffect(() => {
-        if (!planeMesh.current || !planeGeo.current) {
-            return;
-        }
-        planeGeo.current.setAttribute(
-            'position',
-            new BufferAttribute(vertices, 3)
-        );
-        planeGeo.current.attributes.position.needsUpdate = true;
-        planeGeo.current.computeVertexNormals();
-    }, [vertices, planeMesh, planeGeo]);
+  const grassRef = useRef<THREE.InstancedBufferGeometry>(null!);
 
-    return (
-        <mesh ref={planeMesh} castShadow={false} receiveShadow={false}>
-            <planeGeometry
-                args={[size, size, controls.resolution, controls.resolution]}
-                ref={planeGeo}
-            />
-            <meshLambertMaterial color={'white'} side={THREE.DoubleSide} />
-        </mesh>
+  useEffect(() => {
+    if (!planeMesh.current || !planeGeom.current) {
+      return;
+    }
+    planeGeom.current.setAttribute(
+      "position",
+      new BufferAttribute(vertices, 3)
     );
+    planeGeom.current.attributes.position.needsUpdate = true;
+    planeGeom.current.computeVertexNormals();
+  }, [vertices, planeMesh, planeGeom]);
+
+  //   const options = { bW: 0.12, bH: 1, joints: 5 };
+  //   const { bW, bH, joints } = options;
+  //   const materialRef = useRef<THREE.ShaderMaterial>(null!);
+  //   const width = 200;
+  //   const instances = 50000;
+  //   const bladeDiffuse = "/textures/grassBladeDiffuse.jpg";
+  //   const bladeAlpha = "/textures/grassBladeAlpha.jpg";
+  //   const [texture, alphaMap] = useLoader(THREE.TextureLoader, [
+  //     bladeDiffuse,
+  //     bladeAlpha,
+  //   ]);
+  //   const attributeData = useMemo(
+  //     () => getAttributeData(instances, width),
+  //     [instances, width]
+  //   );
+
+  return (
+    <group>
+      <Grass planeGeom={planeGeom.current} />
+      {/* <mesh>
+        <instancedBufferGeometry ref={grassRef}>
+          <instancedBufferAttribute
+            attach="attributes-offset"
+            args={[new Float32Array(attributeData.offsets), 3]}
+          />
+          <instancedBufferAttribute
+            attach="attributes-orientation"
+            args={[new Float32Array(attributeData.orientations), 4]}
+          />
+          <instancedBufferAttribute
+            attach="attributes-stretch"
+            args={[new Float32Array(attributeData.stretches), 1]}
+          />
+          <instancedBufferAttribute
+            attach="attributes-halfRootAngleSin"
+            args={[new Float32Array(attributeData.halfRootAngleSin), 1]}
+          />
+          <instancedBufferAttribute
+            attach="attributes-halfRootAngleCos"
+            args={[new Float32Array(attributeData.halfRootAngleCos), 1]}
+          />
+        </instancedBufferGeometry>
+        <grassMaterial
+          ref={materialRef}
+          map={texture}
+          alphaMap={alphaMap}
+          toneMapped={false}
+        />
+      </mesh> */}
+      <mesh ref={planeMesh} castShadow={false} receiveShadow={false}>
+        <planeGeometry
+          args={[size, size, controls.resolution, controls.resolution]}
+          ref={planeGeom}
+        />
+        <meshLambertMaterial color={"white"} side={THREE.DoubleSide} />
+      </mesh>
+    </group>
+  );
 };
 
 export default HeightMap;
