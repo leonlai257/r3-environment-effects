@@ -1,4 +1,4 @@
-import glslNoise from './glslNoise';
+import glslNoise from './glslNoise'
 
 const hotspotVertex = `
   varying vec2 vUv;
@@ -9,7 +9,7 @@ const hotspotVertex = `
       vPosition = position;
       gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
   }
-`;
+`
 
 const hotspotFragment = `
   precision mediump float;
@@ -43,6 +43,6 @@ const hotspotFragment = `
 
       gl_FragColor = fragColor;
   }
-`;
+`
 
-export { hotspotVertex, hotspotFragment };
+export { hotspotVertex, hotspotFragment }

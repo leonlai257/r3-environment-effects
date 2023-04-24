@@ -1,15 +1,12 @@
-import { shaderMaterial } from '@react-three/drei';
-import { ReactThreeFiber } from '@react-three/fiber';
-import * as THREE from 'three';
-import { hotspotFragment, hotspotVertex } from '../shaders/hotspotShader';
+import { shaderMaterial } from '@react-three/drei'
+import { ReactThreeFiber } from '@react-three/fiber'
+import * as THREE from 'three'
+import { hotspotFragment, hotspotVertex } from '../shaders/hotspotShader'
 
 declare global {
     namespace JSX {
         interface IntrinsicElements {
-            hotspotMaterial: ReactThreeFiber.Object3DNode<
-                THREE.ShaderMaterial,
-                typeof HotspotMaterial
-            >;
+            hotspotMaterial: ReactThreeFiber.Object3DNode<THREE.ShaderMaterial, typeof HotspotMaterial>
         }
     }
 }
@@ -26,7 +23,7 @@ const HotspotMaterial = shaderMaterial(
         uThrust: 0.3,
     },
     hotspotVertex,
-    hotspotFragment,
-);
+    hotspotFragment
+)
 
-export default HotspotMaterial;
+export default HotspotMaterial

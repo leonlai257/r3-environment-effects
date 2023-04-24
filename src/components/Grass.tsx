@@ -1,245 +1,108 @@
-// Based on https://codepen.io/al-ro/pen/jJJygQ by al-ro, but rewritten in react-three-fiber
-import * as THREE from "three";
-import React, { useRef, useMemo, useEffect } from "react";
-import * as SimplexNoise from "simplex-noise";
-import { useFrame, useLoader } from "@react-three/fiber";
-import "./GrassMaterial";
-import { BufferAttribute } from "three";
+import React, { ReactNode, useEffect, useRef } from 'react'
+import * as THREE from 'three'
+import { extend, useFrame } from '@react-three/fiber'
+import { Depth, LayerMaterial } from 'lamina'
+import { Sampler } from '@react-three/drei'
+import WindLayer from '../shaders/windLayer'
+import { Flower } from './Flower'
+import Perlin from 'perlin.js'
 
 declare global {
-  namespace JSX {
-    interface IntrinsicElements {
-      grassMaterial: THREE.ShaderMaterial;
+    namespace JSX {
+        interface IntrinsicElements {
+            windLayer: THREE.Layers
+        }
     }
-  }
 }
 
-const noise2D = SimplexNoise.createNoise2D();
+Perlin.seed(Math.random())
+extend({ WindLayer })
 
 type GrassProps = {
-  planeGeom: THREE.PlaneGeometry | null;
-  options?: {
-    bW: number;
-    bH: number;
-    joints: number;
-  };
-  width?: number;
-  instances?: number;
-  props?: any;
-};
-
-export default function Grass({
-  options = { bW: 0.12, bH: 1, joints: 5 },
-  planeGeom = new THREE.PlaneGeometry(1, 1, 1, 1),
-  width = 200,
-  instances = 50000,
-  ...props
-}: GrassProps) {
-  const { bW, bH, joints } = options;
-  const materialRef = useRef<THREE.ShaderMaterial>(null!);
-
-  const bladeDiffuse = "/textures/grassBladeDiffuse.jpg";
-  const bladeAlpha = "/textures/grassBladeAlpha.jpg";
-  const [texture, alphaMap] = useLoader(THREE.TextureLoader, [
-    bladeDiffuse,
-    bladeAlpha,
-  ]);
-  const attributeData = useMemo(
-    () => getAttributeData(instances, width),
-    [instances, width]
-  );
-
-  const baseGeomRef = useRef<THREE.InstancedBufferGeometry>(null!);
-  let baseGeom = useMemo(
-    () => new THREE.PlaneGeometry(bW, bH, 1, joints).translate(0, bH / 2, 0),
-    [options]
-  );
-  useEffect(() => {
-    if (planeGeom) {
-      console.log(planeGeom);
-      const newBufferGeom = new THREE.BufferGeometry().setFromPoints(
-        planeGeom.attributes.position
-      );
-      console.log("new:", newBufferGeom.attributes.position);
-      console.log(planeGeom.attributes.position);
-      console.log(baseGeom.attributes.position);
-      baseGeom.attributes.position.needsUpdate = true;
-      //   baseGeomRef.current.attributes.position.needsUpdate = true;
-      //   baseGeomRef.current.attributes.uv.needsUpdate = true;
-      //   baseGeomRef.current.attributes.normal.needsUpdate = true;
-
-      //   baseGeom.setAttribute("index", planeGeom.index as BufferAttribute);
-      //   baseGeomRef.current.setAttribute(
-      //     "index",
-      //     planeGeom.index as BufferAttribute
-      //   );
-      baseGeomRef.current.setAttribute(
-        "position",
-        newBufferGeom.attributes.position
-      );
-      //   baseGeomRef.current.setAttribute("normal", planeGeom.attributes.normal);
-      //   baseGeomRef.current.setAttribute("uv", planeGeom.attributes.uv);
-
-      //   baseGeom.attributes.position = planeGeom.attributes.position;
-      //   baseGeom.attributes.normal = planeGeom.attributes.normal;
-      //   baseGeom.attributes.uv = planeGeom.attributes.uv;
-
-      //   baseGeomRef.current.computeVertexNormals();
-    }
-  });
-
-  useFrame(
-    (state) =>
-      (materialRef.current.uniforms.time.value = state.clock.elapsedTime / 4)
-  );
-  return (
-    <group {...props}>
-      <mesh>
-        <instancedBufferGeometry
-          ref={baseGeomRef}
-          index={baseGeom.index}
-          attributes-position={baseGeom.attributes.position}
-          attributes-uv={baseGeom.attributes.uv}
-        >
-          <instancedBufferAttribute
-            attach="attributes-offset"
-            args={[new Float32Array(attributeData.offsets), 3]}
-          />
-          <instancedBufferAttribute
-            attach="attributes-orientation"
-            args={[new Float32Array(attributeData.orientations), 4]}
-          />
-          <instancedBufferAttribute
-            attach="attributes-stretch"
-            args={[new Float32Array(attributeData.stretches), 1]}
-          />
-          <instancedBufferAttribute
-            attach="attributes-halfRootAngleSin"
-            args={[new Float32Array(attributeData.halfRootAngleSin), 1]}
-          />
-          <instancedBufferAttribute
-            attach="attributes-halfRootAngleCos"
-            args={[new Float32Array(attributeData.halfRootAngleCos), 1]}
-          />
-        </instancedBufferGeometry>
-        <grassMaterial
-          ref={materialRef}
-          map={texture}
-          alphaMap={alphaMap}
-          toneMapped={false}
-        />
-      </mesh>
-    </group>
-  );
+    children: ReactNode
+    strands?: number
+    props?: any
 }
 
-export function getAttributeData(instances: number, width: number) {
-  const offsets = [];
-  const orientations = [];
-  const stretches = [];
-  const halfRootAngleSin = [];
-  const halfRootAngleCos = [];
+export const Grass = ({ children, strands = 1000, ...props }: GrassProps) => {
+    const grassSamplerRef = useRef(null!)
+    const meshRef = useRef<THREE.Mesh>(null!)
+    const windLayer = useRef<THREE.Layers>(null!)
+    const flowerRef = useRef<THREE.Mesh>(null!)
+    const geomRef = useRef<THREE.Mesh>(null!)
+    useEffect(() => {
+        console.log(children)
+        meshRef.current.geometry.applyMatrix4(new THREE.Matrix4().makeRotationX(Math.PI / 2))
+        meshRef.current.geometry.applyMatrix4(new THREE.Matrix4().makeTranslation(0, 0, 0.5))
 
-  let quaternion_0 = new THREE.Vector4();
-  let quaternion_1 = new THREE.Vector4();
+        // flowerRef.current.geometry.applyMatrix4(new THREE.Matrix4().makeRotationX(Math.PI / 2))
+        // flowerRef.current.geometry.applyMatrix4(new THREE.Matrix4().makeTranslation(0, 0, 0.5))
+    }, [])
 
-  //The min and max angle for the growth direction (in radians)
-  const min = -0.25;
-  const max = 0.25;
+    useEffect(() => {
+        console.log(grassSamplerRef)
+    })
 
-  //For each instance of the grass blade
-  for (let i = 0; i < instances; i++) {
-    //Offset of the roots
-    const offsetX = Math.random() * width - width / 2;
-    const offsetZ = Math.random() * width - width / 2;
-    const offsetY = getYPosition(offsetX, offsetZ);
-    offsets.push(offsetX, offsetY, offsetZ);
+    useFrame(() => (windLayer.current.time += 0.005))
+    return (
+        <>
+            {/* {React.cloneElement(children, { ref: geomRef })} */}
 
-    //Define random growth directions
-    //Rotate around Y
-    let angle = Math.PI - Math.random() * (2 * Math.PI);
-    halfRootAngleSin.push(Math.sin(0.5 * angle));
-    halfRootAngleCos.push(Math.cos(0.5 * angle));
-
-    let RotationAxis = new THREE.Vector3(0, 1, 0);
-    let x = RotationAxis.x * Math.sin(angle / 2.0);
-    let y = RotationAxis.y * Math.sin(angle / 2.0);
-    let z = RotationAxis.z * Math.sin(angle / 2.0);
-    let w = Math.cos(angle / 2.0);
-    quaternion_0.set(x, y, z, w).normalize();
-
-    //Rotate around X
-    angle = Math.random() * (max - min) + min;
-    RotationAxis = new THREE.Vector3(1, 0, 0);
-    x = RotationAxis.x * Math.sin(angle / 2.0);
-    y = RotationAxis.y * Math.sin(angle / 2.0);
-    z = RotationAxis.z * Math.sin(angle / 2.0);
-    w = Math.cos(angle / 2.0);
-    quaternion_1.set(x, y, z, w).normalize();
-
-    //Combine rotations to a single quaternion
-    quaternion_0 = multiplyQuaternions(quaternion_0, quaternion_1);
-
-    //Rotate around Z
-    angle = Math.random() * (max - min) + min;
-    RotationAxis = new THREE.Vector3(0, 0, 1);
-    x = RotationAxis.x * Math.sin(angle / 2.0);
-    y = RotationAxis.y * Math.sin(angle / 2.0);
-    z = RotationAxis.z * Math.sin(angle / 2.0);
-    w = Math.cos(angle / 2.0);
-    quaternion_1.set(x, y, z, w).normalize();
-
-    //Combine rotations to a single quaternion
-    quaternion_0 = multiplyQuaternions(quaternion_0, quaternion_1);
-
-    orientations.push(
-      quaternion_0.x,
-      quaternion_0.y,
-      quaternion_0.z,
-      quaternion_0.w
-    );
-
-    //Define variety in height
-    if (i < instances / 3) {
-      stretches.push(Math.random() * 1.8);
-    } else {
-      stretches.push(Math.random());
-    }
-  }
-
-  return {
-    offsets,
-    orientations,
-    stretches,
-    halfRootAngleCos,
-    halfRootAngleSin,
-  };
-}
-
-function multiplyQuaternions(
-  q1: {
-    x: number;
-    y: number;
-    w: number;
-    z: number;
-  },
-  q2: {
-    x: number;
-    y: number;
-    w: number;
-    z: number;
-  }
-) {
-  const x = q1.x * q2.w + q1.y * q2.z - q1.z * q2.y + q1.w * q2.x;
-  const y = -q1.x * q2.z + q1.y * q2.w + q1.z * q2.x + q1.w * q2.y;
-  const z = q1.x * q2.y - q1.y * q2.x + q1.z * q2.w + q1.w * q2.z;
-  const w = -q1.x * q2.x - q1.y * q2.y - q1.z * q2.z + q1.w * q2.w;
-  return new THREE.Vector4(x, y, z, w);
-}
-
-function getYPosition(x: number, z: number) {
-  var y = 2 * noise2D(x / 50, z / 50);
-  y += 4 * noise2D(x / 100, z / 100);
-  y += 0.2 * noise2D(x / 10, z / 10);
-  return y;
+            {/* <Flower ref={flowerRef} /> */}
+            <group>
+                <Sampler
+                    ref={grassSamplerRef}
+                    matrixAutoUpdate
+                    matrixWorldNeedsUpdate
+                    transform={({ position, normal, dummy: object }) => {
+                        const p = position.clone().multiplyScalar(200)
+                        const n = Perlin.simplex3(...p.toArray())
+                        object.scale.setScalar(THREE.MathUtils.mapLinear(n, -1, 1, 0.3, 1) * 10)
+                        object.position.copy(position)
+                        object.lookAt(normal.add(position))
+                        object.rotation.y += Math.random() - 0.5 * (Math.PI * 0.5)
+                        object.rotation.z += Math.random() - 0.5 * (Math.PI * 0.5)
+                        object.rotation.x += Math.random() - 0.5 * (Math.PI * 0.5)
+                        object.updateMatrix()
+                        return object
+                    }}
+                    // mesh={geomRef.current}
+                    // instances={meshRef}
+                >
+                    {children}
+                    <instancedMesh ref={meshRef} args={[undefined, undefined, strands]}>
+                        <coneGeometry args={[0.05, 1.0, 2, 20, false, 0, Math.PI]} />
+                        <LayerMaterial side={THREE.DoubleSide} lighting="physical" envMapIntensity={1}>
+                            <Depth colorA="#221600" colorB="#ade266" near={0.14} far={1.52} mapping={'world'} />
+                            <windLayer
+                                args={[{ mode: 'multiply' }]}
+                                colorA={'#ffffff'}
+                                colorB={'#acf5ce'}
+                                noiseScale={10}
+                                noiseStrength={5}
+                                length={1.2}
+                                sway={0.5}
+                                ref={windLayer}
+                            />
+                        </LayerMaterial>
+                    </instancedMesh>
+                </Sampler>
+                {/* <Sampler
+                    transform={({ position, normal, dummy: object }) => {
+                        object.scale.setScalar(Math.random() * 0.0075)
+                        object.position.copy(position)
+                        object.lookAt(normal.add(position))
+                        object.rotation.y += Math.random() - 0.5 * (Math.PI * 0.5)
+                        object.rotation.x += Math.random() - 0.5 * (Math.PI * 0.5)
+                        object.rotation.z += Math.random() - 0.5 * (Math.PI * 0.5)
+                        object.updateMatrix()
+                        return object
+                    }}
+                    mesh={geomRef}
+                    instances={flowerRef}
+                    weight="density"
+                /> */}
+            </group>
+        </>
+    )
 }

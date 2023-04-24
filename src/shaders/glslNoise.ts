@@ -137,6 +137,6 @@ vec3 curlNoise( vec3 p ){
 
 }
 
-`;
+`
 
-export default glslNoise;
+export default glslNoise

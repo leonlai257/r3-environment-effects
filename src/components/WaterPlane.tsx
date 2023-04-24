@@ -1,42 +1,30 @@
-import {
-    ThreeElements,
-    extend,
-    useFrame,
-    useLoader,
-    useThree,
-} from '@react-three/fiber';
-import { useMemo, useRef } from 'react';
-import * as THREE from 'three';
-import { Water } from 'three-stdlib';
+import { ThreeElements, extend, useFrame, useLoader, useThree } from '@react-three/fiber'
+import { useMemo, useRef } from 'react'
+import * as THREE from 'three'
+import { Water } from 'three-stdlib'
 
-extend({ Water });
+extend({ Water })
 
 declare global {
     namespace JSX {
         interface IntrinsicElements {
-            water: ThreeElements['mesh'];
+            water: ThreeElements['mesh']
         }
     }
 }
 
 interface WaterPlaneProps {
-    size: number;
-    props?: ThreeElements['mesh'];
+    size: number
+    props?: ThreeElements['mesh']
 }
 
 export const WaterPlane = ({ size, props }: WaterPlaneProps) => {
-    const ref = useRef<THREE.Mesh>(null!);
-    const gl = useThree((state) => state.gl);
-    const waterNormals = useLoader(
-        THREE.TextureLoader,
-        '/normals/waterNormalMap.jpeg'
-    );
-    waterNormals.wrapS = waterNormals.wrapT = THREE.RepeatWrapping;
-    const waterGeometrySize = size * 20;
-    const waterGeometry = useMemo(
-        () => new THREE.PlaneGeometry(waterGeometrySize, waterGeometrySize),
-        []
-    );
+    const ref = useRef<THREE.Mesh>(null!)
+    const gl = useThree((state) => state.gl)
+    const waterNormals = useLoader(THREE.TextureLoader, '/normals/waterNormalMap.jpeg')
+    waterNormals.wrapS = waterNormals.wrapT = THREE.RepeatWrapping
+    const waterGeometrySize = size * 20
+    const waterGeometry = useMemo(() => new THREE.PlaneGeometry(waterGeometrySize, waterGeometrySize), [])
     const config = useMemo(
         () => ({
             textureWidth: 512,
@@ -50,19 +38,7 @@ export const WaterPlane = ({ size, props }: WaterPlaneProps) => {
             format: gl.outputEncoding,
         }),
         [waterNormals]
-    );
-    useFrame(
-        (state, delta) =>
-            ((
-                ref.current.material as THREE.ShaderMaterial
-            ).uniforms.time.value += delta)
-    );
-    return (
-        <water
-            ref={ref}
-            args={[waterGeometry, config]}
-            rotation-x={-Math.PI / 2}
-            {...props}
-        />
-    );
-};
+    )
+    useFrame((state, delta) => ((ref.current.material as THREE.ShaderMaterial).uniforms.time.value += delta))
+    return <water ref={ref} args={[waterGeometry, config]} rotation-x={-Math.PI / 2} {...props} />
+}
