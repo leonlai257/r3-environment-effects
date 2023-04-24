@@ -5,6 +5,7 @@ import { Route, Switch } from 'wouter'
 import React from 'react'
 import Main from '.'
 import '../styles/globals.css'
+import { Stats } from '@react-three/drei'
 
 export default function App({ pageProps }: AppProps) {
     return (
@@ -16,8 +17,7 @@ export default function App({ pageProps }: AppProps) {
                 width: '100%',
                 height: '100%',
                 overflow: 'hidden',
-            }}
-        >
+            }}>
             <Head>
                 <title>React three Environment</title>
                 <meta name="React three Environment" content="React three Environment by Leon" />
@@ -26,6 +26,7 @@ export default function App({ pageProps }: AppProps) {
                 <ambientLight intensity={0.1} />
 
                 <directionalLight intensity={0.5} castShadow shadow-mapSize-height={128} shadow-mapSize-width={128} />
+                <Stats />
                 <Switch>
                     <Route path="/">
                         <Main {...pageProps} />

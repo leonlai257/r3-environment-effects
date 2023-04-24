@@ -2,7 +2,7 @@ import { AltGrass, Grass, Glass, HeightMap } from '@/components'
 import { WaterPlane } from '@/components/WaterPlane'
 import { Cloud, OrbitControls, PerspectiveCamera, Plane, Sky, Sphere } from '@react-three/drei'
 import { Suspense, createRef, useState } from 'react'
-import { PlaneGeometry } from 'three'
+import { Fog, PlaneGeometry } from 'three'
 
 export const DEFAULT_CONTROL_VALUES = {
     seed: 'React3-Environment-Test',
@@ -47,19 +47,14 @@ const Main = () => {
 
     return (
         <>
+            <fog attach="fog" args={['hotpink', 20, 200]} />
             <Suspense fallback={null}>
                 <Sky />
-                {/* <Cloud
-                position={[0, 100, 0]}
-                color={'#ffffff'}
-                opacity={1}
-                speed={0.4}
-                width={50}
-                depth={0.3}
-                segments={300}
-            /> */}
-                {/* <Glass position={[0, 10, 0]} rotation={[Math.PI / 2, 0, 0]} scale={[1, 1, 1]} /> */}
-                {/* <Grass/> */}
+                <Cloud position={[50, 20, 80]} color={'#ffffff'} opacity={1} speed={0.4} width={40} depth={0.8} segments={200} />
+                <Cloud position={[-50, 20, 80]} color={'#ffffff'} opacity={1} speed={0.4} width={40} depth={0.8} segments={200} />
+
+                <Glass position={[0, 30, 0]} rotation={[Math.PI / 2, 0, 0]} scale={[2, 2, 2]} />
+                {/* <AltGrass /> */}
 
                 <WaterPlane
                     size={mapSize}
@@ -67,12 +62,12 @@ const Main = () => {
                         position: [0, 3, 0],
                     }}
                 />
-                <Grass>
-                    <HeightMap size={mapSize} config={DEFAULT_CONTROL_VALUES} />
-                </Grass>
+                {/* <Grass> */}
+                <HeightMap size={mapSize} config={DEFAULT_CONTROL_VALUES} />
+                {/* </Grass> */}
             </Suspense>
 
-            <PerspectiveCamera makeDefault ref={cameraRef} fov={fov} near={0.1} far={1000} position={[0, 0, 10]} />
+            <PerspectiveCamera makeDefault ref={cameraRef} fov={fov} near={0.1} far={1000} position={[0, 30, -70]} />
 
             <OrbitControls enableZoom={true} enableRotate={true} />
         </>
