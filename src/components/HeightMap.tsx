@@ -47,8 +47,8 @@ export const HeightMap = ({ config, size }: HeightMapProps) => {
 
     console.log('vertices: ', vertices)
 
-    // const gradientTexture = useLoader(THREE.TextureLoader, '/heightmap/biomeGradientMap.png')
-    const gradientTexture = useLoader(THREE.TextureLoader, '/heightmap/heatGradientMap.png')
+    const gradientTexture = useLoader(THREE.TextureLoader, '/heightmap/biomeGradientMap.png')
+    // const gradientTexture = useLoader(THREE.TextureLoader, '/heightmap/heatGradientMap.png')
 
     let CustomMaterial = new THREE.ShaderMaterial({
         uniforms: {
@@ -78,10 +78,8 @@ export const HeightMap = ({ config, size }: HeightMapProps) => {
           uniform float height;
           
           void main() {
-            // float h = clamp(vPos.z, 0., 1.) ;
             float h = (vPos.z - (-limits))/(limits * height * 20.);
-            // h = clamp(h, 0., 1.);
-            vec4 diffuseColor = texture2D(colorTexture, vec2(0, h) ) ;
+            vec4 diffuseColor = texture2D(colorTexture, vec2(vPos.z, h) ) ;
             gl_FragColor = vec4(diffuseColor.rgb, 1.0);
           }
       `,
