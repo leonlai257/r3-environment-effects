@@ -1,8 +1,6 @@
-import { AltGrass, Grass, Glass, HeightMap } from '@/components'
-import { WaterPlane } from '@/components/WaterPlane'
-import { Cloud, OrbitControls, PerspectiveCamera, Plane, Sky, Sphere } from '@react-three/drei'
+import { AltGrass, Grass, Glass, HeightMap, Clouds, WaterPlane } from '@/components'
+import { OrbitControls, PerspectiveCamera, Plane, Sky, Sphere } from '@react-three/drei'
 import { Suspense, createRef, useState } from 'react'
-import { Fog, PlaneGeometry } from 'three'
 
 export const DEFAULT_CONTROL_VALUES = {
     seed: 'React3-Environment-Test',
@@ -36,6 +34,12 @@ export const DEFAULT_CONTROL_VALUES = {
         max: 6,
         step: 1,
     },
+    limits: {
+        value: 0.4,
+        min: 0,
+        max: 1,
+        step: 0.05,
+    },
 }
 
 const Main = () => {
@@ -47,13 +51,12 @@ const Main = () => {
 
     return (
         <>
-            <fog attach="fog" args={['hotpink', 20, 200]} />
+            {/* <fog attach="fog" args={['hotpink', 20, 200]} /> */}
             <Suspense fallback={null}>
                 <Sky />
-                <Cloud position={[50, 20, 80]} color={'#ffffff'} opacity={1} speed={0.4} width={40} depth={0.8} segments={200} />
-                <Cloud position={[-50, 20, 80]} color={'#ffffff'} opacity={1} speed={0.4} width={40} depth={0.8} segments={200} />
+                {/* <Clouds /> */}
+                {/* <Glass position={[0, 30, 0]} rotation={[Math.PI / 2, 0, 0]} scale={[2, 2, 2]} /> */}
 
-                <Glass position={[0, 30, 0]} rotation={[Math.PI / 2, 0, 0]} scale={[2, 2, 2]} />
                 {/* <AltGrass /> */}
 
                 <WaterPlane

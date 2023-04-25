@@ -1,8 +1,8 @@
-import { extend } from '@react-three/fiber'
+import { useLoader } from '@react-three/fiber'
 import { useControls } from 'leva'
 import { useEffect, useRef } from 'react'
 import * as THREE from 'three'
-import { BufferAttribute, MeshBasicMaterial, Vector2 } from 'three'
+import { BufferAttribute } from 'three'
 import useFlipPlaneOnX from '../hooks/useFlipPlaneOnX'
 import useNoisyVertices from '../hooks/useNoisyVertices'
 
@@ -20,53 +20,13 @@ export type HeightMapConfig = {
     frequency: ControlConfig
     exponent: ControlConfig
     octaves: ControlConfig
+    limits: ControlConfig
 }
 
 interface HeightMapProps {
     config: HeightMapConfig
     size?: number
 }
-
-// function setGradient(geometry: THREE.BufferGeometry, colors, axis, reverse) {
-//     geometry.computeBoundingBox()
-
-//     var bbox = geometry.boundingBox
-//     var size = new THREE.Vector3().subVectors(bbox.max, bbox.min)
-
-//     var vertexIndices = ['a', 'b', 'c']
-//     var face,
-//         vertex,
-//         normalized = new THREE.Vector3(),
-//         normalizedAxis = 0
-
-//     const geometryIndexArray = geometry.getIndex().array
-//     for (let i = 0; i < geometryIndexArray.length; i++) {
-
-//     }
-//     geometryIndexArray.map((index) => {
-
-//         })
-//     let faces =
-
-//     for (var c = 0; c < colors.length - 1; c++) {
-//         var colorDiff = colors[c + 1].stop - colors[c].stop
-
-//         for (var i = 0; i < geometry.faces.length; i++) {
-//             face = geometry.faces[i]
-//             for (var v = 0; v < 3; v++) {
-//                 vertex = geometry.vertices[face[vertexIndices[v]]]
-//                 normalizedAxis = normalized.subVectors(vertex, bbox.min).divide(size)[axis]
-//                 if (reverse) {
-//                     normalizedAxis = 1 - normalizedAxis
-//                 }
-//                 if (normalizedAxis >= colors[c].stop && normalizedAxis <= colors[c + 1].stop) {
-//                     var localNormalizedAxis = (normalizedAxis - colors[c].stop) / colorDiff
-//                     face.vertexColors[v] = colors[c].color.clone().lerp(colors[c + 1].color, localNormalizedAxis)
-//                 }
-//             }
-//         }
-//     }
-// }
 
 export const HeightMap = ({ config, size }: HeightMapProps) => {
     const controls = useControls(config)
@@ -87,56 +47,43 @@ export const HeightMap = ({ config, size }: HeightMapProps) => {
 
     console.log('vertices: ', vertices)
 
-    var colors = [
-        {
-            stop: 0,
-            color: new THREE.Color(0xf7b000),
-        },
-        {
-            stop: 0.25,
-            color: new THREE.Color(0xdd0080),
-        },
-        {
-            stop: 0.5,
-            color: new THREE.Color(0x622b85),
-        },
-        {
-            stop: 0.75,
-            color: new THREE.Color(0x007dae),
-        },
-        {
-            stop: 1,
-            color: new THREE.Color(0x77c8db),
-        },
-    ]
+    // const gradientTexture = useLoader(THREE.TextureLoader, '/heightmap/biomeGradientMap.png')
+    const gradientTexture = useLoader(THREE.TextureLoader, '/heightmap/heatGradientMap.png')
 
     let CustomMaterial = new THREE.ShaderMaterial({
         uniforms: {
-            color1: {
-                value: new THREE.Color('green'),
+            colorTexture: {
+                value: gradientTexture,
             },
-            color2: {
-                value: new THREE.Color('white'),
+            limits: {
+                value: config.limits.value || 0.4,
+            },
+            height: {
+                value: config.maxHeight.value || 3.5,
             },
         },
         vertexShader: `
-        varying vec2 vUv;
-    
-        void main() {
-          // vUv = uv;
-          gl_Position = projectionMatrix * modelViewMatrix * vec4(position,1.0);
-        }
-      `,
-        fragmentShader: `
-        uniform vec3 color1;
-        uniform vec3 color2;
-      
-        varying vec2 vUv;
-        
-        void main() {
+          varying vec3 vPos;
+
+          void main() {
+            vPos = position;
+            gl_Position =  projectionMatrix * modelViewMatrix * vec4(vPos,1.0);
+          }
+        `,
+        fragmentShader: `    
+          varying vec3 vPos;
+
+          uniform float limits;
+          uniform sampler2D colorTexture;
+          uniform float height;
           
-          gl_FragColor = vec4(mix(color1, color2, vUv.y), 1.0);
-        }
+          void main() {
+            // float h = clamp(vPos.z, 0., 1.) ;
+            float h = (vPos.z - (-limits))/(limits * height * 20.);
+            // h = clamp(h, 0., 1.);
+            vec4 diffuseColor = texture2D(colorTexture, vec2(0, h) ) ;
+            gl_FragColor = vec4(diffuseColor.rgb, 1.0);
+          }
       `,
     })
 
@@ -146,21 +93,18 @@ export const HeightMap = ({ config, size }: HeightMapProps) => {
         }
         planeGeom.current.setAttribute('position', new BufferAttribute(vertices, 3))
         planeGeom.current.attributes.position.needsUpdate = true
-        console.log(planeGeom.current)
-        // setGradient(planeGeom.current, colors, 'z', true)
         planeGeom.current.computeVertexNormals()
     }, [vertices, ref, planeGeom])
 
     return (
         <mesh ref={ref} castShadow={false} receiveShadow={false}>
             <planeBufferGeometry args={[size, size, controls.resolution, controls.resolution]} ref={planeGeom} />
-            {/* <shaderMaterial
+            <shaderMaterial
                 uniforms={CustomMaterial.uniforms}
                 vertexShader={CustomMaterial.vertexShader}
                 fragmentShader={CustomMaterial.fragmentShader}
-            /> */}
-            {/* <meshBasicMaterial vertexColors={true} /> */}
-            <meshLambertMaterial color={'white'} side={THREE.DoubleSide} />
+            />
+            {/* <meshLambertMaterial color={'white'} side={THREE.DoubleSide} /> */}
         </mesh>
     )
 }
