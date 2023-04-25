@@ -1,6 +1,6 @@
 import { useLoader } from '@react-three/fiber'
 import { useControls } from 'leva'
-import { useEffect, useRef } from 'react'
+import { ForwardedRef, Ref, forwardRef, useEffect, useRef } from 'react'
 import * as THREE from 'three'
 import { BufferAttribute } from 'three'
 import useFlipPlaneOnX from '../hooks/useFlipPlaneOnX'
@@ -28,9 +28,9 @@ interface HeightMapProps {
     size?: number
 }
 
-export const HeightMap = ({ config, size }: HeightMapProps) => {
+export const HeightMap = forwardRef(({ config, size }: HeightMapProps, ref: Ref<THREE.Mesh>) => {
     const controls = useControls(config)
-    const ref = useRef<THREE.Mesh>(null)
+    // const ref = useRef<THREE.Mesh>(null)
     const planeGeom = useRef<THREE.BufferGeometry>(null!)
     useFlipPlaneOnX(ref)
 
@@ -105,4 +105,4 @@ export const HeightMap = ({ config, size }: HeightMapProps) => {
             {/* <meshLambertMaterial color={'white'} side={THREE.DoubleSide} /> */}
         </mesh>
     )
-}
+})
