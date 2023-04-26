@@ -5,6 +5,38 @@ import * as THREE from 'three'
 import { BufferAttribute } from 'three'
 import useFlipPlaneOnX from '../hooks/useFlipPlaneOnX'
 import useNoisyVertices from '../hooks/useNoisyVertices'
+import Perlin from 'perlin.js'
+import { ComputedAttribute } from '@react-three/drei'
+
+const computeGrassDensity = (geometry: THREE.BufferGeometry) => {
+    const position = geometry.getAttribute('position') as BufferAttribute
+    const density = []
+    const vertex = new THREE.Vector3()
+    for (let i = 0; i < position.count; i++) {
+        vertex.fromBufferAttribute(position, i)
+        const p = vertex.clone().multiplyScalar(1)
+        const n = Perlin.simplex3(...p.toArray())
+        let m = THREE.MathUtils.mapLinear(n, -1, 1, 0, 1)
+        if (m > 0.15) m = 0
+        density.push(m)
+    }
+    return new THREE.Float32BufferAttribute(density, 1)
+}
+
+const computeFlowerDensity = (geometry: THREE.BufferGeometry) => {
+    const position = geometry.getAttribute('position') as BufferAttribute
+    const density = []
+    const vertex = new THREE.Vector3()
+    for (let i = 0; i < position.count; i++) {
+        vertex.fromBufferAttribute(position, i)
+        const p = vertex.clone().multiplyScalar(1)
+        const n = Perlin.simplex3(...p.toArray())
+        let m = THREE.MathUtils.mapLinear(n, -1, 1, 0, 1)
+        if (m > 0.15) m = 0
+        density.push(m)
+    }
+    return new THREE.Float32BufferAttribute(density, 1)
+}
 
 type ControlConfig = {
     value: number
@@ -32,7 +64,6 @@ export const HeightMap = forwardRef(({ config, size }: HeightMapProps, ref: Ref<
     const controls = useControls(config)
     // const ref = useRef<THREE.Mesh>(null)
     const planeGeom = useRef<THREE.BufferGeometry>(null!)
-    useFlipPlaneOnX(ref)
 
     let vertices = useNoisyVertices(controls, {
         ...controls,
@@ -95,8 +126,10 @@ export const HeightMap = forwardRef(({ config, size }: HeightMapProps, ref: Ref<
     }, [vertices, ref, planeGeom])
 
     return (
-        <mesh ref={ref} castShadow={false} receiveShadow={false}>
-            <planeBufferGeometry args={[size, size, controls.resolution, controls.resolution]} ref={planeGeom} />
+        <mesh ref={ref} rotation={[-Math.PI / 2, 0, 0]}>
+            <planeBufferGeometry args={[size, size, controls.resolution, controls.resolution]} ref={planeGeom}>
+                <ComputedAttribute name="grassDensity" compute={computeGrassDensity} usage={THREE.StaticReadUsage} />
+            </planeBufferGeometry>
             <shaderMaterial
                 uniforms={CustomMaterial.uniforms}
                 vertexShader={CustomMaterial.vertexShader}

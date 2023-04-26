@@ -1,6 +1,7 @@
 import { AltGrass, Grass, Glass, HeightMap, Clouds, WaterPlane } from '@/components'
 import { OrbitControls, PerspectiveCamera, Plane, Sky, Sphere } from '@react-three/drei'
 import { Suspense, createRef, useState } from 'react'
+import { DepthOfField, EffectComposer } from '@react-three/postprocessing'
 
 export const DEFAULT_CONTROL_VALUES = {
     seed: 'React3-Environment-Test',
@@ -71,6 +72,13 @@ const Main = () => {
             </Suspense>
 
             <PerspectiveCamera makeDefault ref={cameraRef} fov={fov} near={0.1} far={1000} position={[0, 30, -70]} />
+            {/* <EffectComposer>
+                <DepthOfField
+                    focusDistance={0} 
+                    focalLength={0.02} 
+                    bokehScale={2} 
+                />
+            </EffectComposer> */}
 
             <OrbitControls enableZoom={true} enableRotate={true} />
         </>
