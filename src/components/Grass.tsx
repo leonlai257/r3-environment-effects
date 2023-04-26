@@ -26,10 +26,9 @@ type GrassProps = {
 }
 
 export const Grass = ({ children, strands = 1000, ...props }: GrassProps) => {
-    const grassSamplerRef = useRef(null!)
     const grassInstanceRef = useRef<THREE.InstancedMesh>(null!)
-    const windLayer = useRef<DepthProps>(null!)
     const flowerRef = useRef<THREE.InstancedMesh>(null!)
+    const windLayer = useRef<DepthProps>(null!)
     const geomRef = useRef<THREE.Mesh>(null!)
     useEffect(() => {
         console.log(children)
@@ -41,11 +40,7 @@ export const Grass = ({ children, strands = 1000, ...props }: GrassProps) => {
         // flowerRef.current.geometry.applyMatrix4(new THREE.Matrix4().makeTranslation(0, 0, 0.5))
     }, [])
 
-    useEffect(() => {
-        console.log(grassSamplerRef)
-    })
-
-    // useFrame(() => (windLayer.current.time += 0.005))
+    useFrame(() => (windLayer.current.time += 0.005))
     return (
         <>
             {React.cloneElement(children, { ref: geomRef })}
@@ -61,15 +56,14 @@ export const Grass = ({ children, strands = 1000, ...props }: GrassProps) => {
                         colorB={'#acf5ce'}
                         noiseScale={10}
                         noiseStrength={5}
-                        length={1.2}
-                        sway={0.5}
+                        length={1.4}
+                        sway={0.1}
                         ref={windLayer}
                     />
                 </LayerMaterial>
             </instancedMesh>
             <group rotation={[0, 0, Math.PI / 2]}>
                 <Sampler
-                    ref={grassSamplerRef}
                     count={strands}
                     matrixAutoUpdate
                     matrixWorldNeedsUpdate

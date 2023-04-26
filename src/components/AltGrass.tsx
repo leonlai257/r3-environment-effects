@@ -17,7 +17,7 @@ declare global {
 const noise2D = SimplexNoise.createNoise2D()
 
 type GrassProps = {
-    planeGeom?: THREE.PlaneGeometry | null
+    vertices?: Float32Array
     options?: {
         bW: number
         bH: number
@@ -30,7 +30,7 @@ type GrassProps = {
 
 export const AltGrass = ({
     options = { bW: 0.12, bH: 1, joints: 5 },
-    planeGeom = new THREE.PlaneGeometry(1, 1, 1, 1),
+    vertices = [],
     width = 200,
     instances = 50000,
     ...props
@@ -41,38 +41,10 @@ export const AltGrass = ({
     const bladeDiffuse = '/textures/grassBladeDiffuse.jpg'
     const bladeAlpha = '/textures/grassBladeAlpha.jpg'
     const [texture, alphaMap] = useLoader(THREE.TextureLoader, [bladeDiffuse, bladeAlpha])
-    const attributeData = useMemo(() => getAttributeData(instances, width), [instances, width])
+    const attributeData = useMemo(() => getAttributeData(instances / 5000, width, vertices), [instances, width])
 
     const baseGeomRef = useRef<THREE.InstancedBufferGeometry>(null!)
     let baseGeom = useMemo(() => new THREE.PlaneGeometry(bW, bH, 1, joints).translate(0, bH / 2, 0), [options])
-    useEffect(() => {
-        if (planeGeom) {
-            console.log(planeGeom)
-            // const newBufferGeom = new THREE.BufferGeometry().setFromPoints(planeGeom.attributes.position)
-            // console.log('new:', newBufferGeom.attributes.position)
-            // console.log(planeGeom.attributes.position)
-            // console.log(baseGeom.attributes.position)
-            // baseGeom.attributes.position.needsUpdate = true
-            //   baseGeomRef.current.attributes.position.needsUpdate = true;
-            //   baseGeomRef.current.attributes.uv.needsUpdate = true;
-            //   baseGeomRef.current.attributes.normal.needsUpdate = true;
-
-            //   baseGeom.setAttribute("index", planeGeom.index as BufferAttribute);
-            //   baseGeomRef.current.setAttribute(
-            //     "index",
-            //     planeGeom.index as BufferAttribute
-            //   );
-            // baseGeomRef.current.setAttribute('position', newBufferGeom.attributes.position)
-            //   baseGeomRef.current.setAttribute("normal", planeGeom.attributes.normal);
-            //   baseGeomRef.current.setAttribute("uv", planeGeom.attributes.uv);
-
-            //   baseGeom.attributes.position = planeGeom.attributes.position;
-            //   baseGeom.attributes.normal = planeGeom.attributes.normal;
-            //   baseGeom.attributes.uv = planeGeom.attributes.uv;
-
-            //   baseGeomRef.current.computeVertexNormals();
-        }
-    })
 
     useFrame((state) => (materialRef.current.uniforms.time.value = state.clock.elapsedTime / 4))
     return (
@@ -101,7 +73,7 @@ export const AltGrass = ({
     )
 }
 
-export function getAttributeData(instances: number, width: number) {
+export function getAttributeData(instances: number, width: number, vertices) {
     const offsets = []
     const orientations = []
     const stretches = []
@@ -116,57 +88,67 @@ export function getAttributeData(instances: number, width: number) {
     const max = 0.25
 
     //For each instance of the grass blade
-    for (let i = 0; i < instances; i++) {
-        //Offset of the roots
-        const offsetX = Math.random() * width - width / 2
-        const offsetZ = Math.random() * width - width / 2
-        const offsetY = getYPosition(offsetX, offsetZ)
-        offsets.push(offsetX, offsetY, offsetZ)
+    for (let i = 0; i <= vertices.length; i += 3) {
+        const vertexX = vertices[i]
+        const vertexY = vertices[i + 1]
+        const vertexZ = vertices[i + 2]
 
-        //Define random growth directions
-        //Rotate around Y
-        let angle = Math.PI - Math.random() * (2 * Math.PI)
-        halfRootAngleSin.push(Math.sin(0.5 * angle))
-        halfRootAngleCos.push(Math.cos(0.5 * angle))
+        // disable grass below a certain height
+        if (vertexZ < 5) continue
+        const randomAmount = Math.floor(Math.random() * 50000)
+        for (let i = 0; i < instances; i++) {
+            const offsetX = vertexX + Math.random() * 5
+            const offsetY = vertexY + Math.random() * 5
+            const offsetZ = vertexZ - Math.random() * 0.1
+            offsets.push(offsetX, offsetY, offsetZ)
 
-        let RotationAxis = new THREE.Vector3(0, 1, 0)
-        let x = RotationAxis.x * Math.sin(angle / 2.0)
-        let y = RotationAxis.y * Math.sin(angle / 2.0)
-        let z = RotationAxis.z * Math.sin(angle / 2.0)
-        let w = Math.cos(angle / 2.0)
-        quaternion_0.set(x, y, z, w).normalize()
+            //Define random growth directions
+            //Rotate around Y
+            let angle = Math.PI - Math.random() * (2 * Math.PI)
+            halfRootAngleSin.push(Math.sin(0.5 * angle))
+            halfRootAngleCos.push(Math.cos(0.5 * angle))
+            console.log(Math.sin(angle / 2.0))
 
-        //Rotate around X
-        angle = Math.random() * (max - min) + min
-        RotationAxis = new THREE.Vector3(1, 0, 0)
-        x = RotationAxis.x * Math.sin(angle / 2.0)
-        y = RotationAxis.y * Math.sin(angle / 2.0)
-        z = RotationAxis.z * Math.sin(angle / 2.0)
-        w = Math.cos(angle / 2.0)
-        quaternion_1.set(x, y, z, w).normalize()
+            let RotationAxis = new THREE.Vector3(0, 1, 0)
+            let x = RotationAxis.x * Math.sin(angle / 2.0)
+            let y = RotationAxis.y * Math.sin(angle / 2.0)
+            let z = RotationAxis.z * Math.sin(angle / 2.0)
+            let w = Math.cos(angle / 2.0)
 
-        //Combine rotations to a single quaternion
-        quaternion_0 = multiplyQuaternions(quaternion_0, quaternion_1)
+            quaternion_0.set(x, y, z, w).normalize()
 
-        //Rotate around Z
-        angle = Math.random() * (max - min) + min
-        RotationAxis = new THREE.Vector3(0, 0, 1)
-        x = RotationAxis.x * Math.sin(angle / 2.0)
-        y = RotationAxis.y * Math.sin(angle / 2.0)
-        z = RotationAxis.z * Math.sin(angle / 2.0)
-        w = Math.cos(angle / 2.0)
-        quaternion_1.set(x, y, z, w).normalize()
+            //Rotate around X
+            angle = Math.random() * (max - min) + min
+            RotationAxis = new THREE.Vector3(1, 0, 0)
+            x = RotationAxis.x * Math.sin(angle / 2.0)
+            y = RotationAxis.y * Math.sin(angle / 2.0)
+            z = RotationAxis.z * Math.sin(angle / 2.0)
+            w = Math.cos(angle / 2.0)
+            quaternion_1.set(x, y, z, w).normalize()
 
-        //Combine rotations to a single quaternion
-        quaternion_0 = multiplyQuaternions(quaternion_0, quaternion_1)
+            //Combine rotations to a single quaternion
+            quaternion_0 = multiplyQuaternions(quaternion_0, quaternion_1)
 
-        orientations.push(quaternion_0.x, quaternion_0.y, quaternion_0.z, quaternion_0.w)
+            //Rotate around Z
+            angle = Math.random() * (max - min) + min
+            RotationAxis = new THREE.Vector3(0, 0, 1)
+            x = RotationAxis.x * Math.sin(angle / 2.0)
+            y = RotationAxis.y * Math.sin(angle / 2.0)
+            z = RotationAxis.z * Math.sin(angle / 2.0)
+            w = Math.cos(angle / 2.0)
+            quaternion_1.set(x, y, z, w).normalize()
 
-        //Define variety in height
-        if (i < instances / 3) {
-            stretches.push(Math.random() * 1.8)
-        } else {
-            stretches.push(Math.random())
+            //Combine rotations to a single quaternion
+            quaternion_0 = multiplyQuaternions(quaternion_0, quaternion_1)
+
+            orientations.push(quaternion_0.x, quaternion_0.y, quaternion_0.z, quaternion_0.w)
+
+            //Define variety in height
+            if (i < instances / 3) {
+                stretches.push(Math.random() * 1.8)
+            } else {
+                stretches.push(Math.random())
+            }
         }
     }
 
@@ -178,6 +160,84 @@ export function getAttributeData(instances: number, width: number) {
         halfRootAngleSin,
     }
 }
+
+// export function getAttributeData(instances: number, width: number, vertices) {
+//     const offsets = []
+//     const orientations = []
+//     const stretches = []
+//     const halfRootAngleSin = []
+//     const halfRootAngleCos = []
+
+//     let quaternion_0 = new THREE.Vector4()
+//     let quaternion_1 = new THREE.Vector4()
+
+//     //The min and max angle for the growth direction (in radians)
+//     const min = -0.25
+//     const max = 0.25
+
+//     //For each instance of the grass blade
+//     for (let i = 0; i < instances; i++) {
+//         //Offset of the roots
+//         const offsetX = Math.random() * width - width / 2
+//         const offsetZ = Math.random() * width - width / 2
+//         const offsetY = getYPosition(offsetX, offsetZ)
+//         offsets.push(offsetX, offsetY, offsetZ)
+
+//         //Define random growth directions
+//         //Rotate around Y
+//         let angle = Math.PI - Math.random() * (2 * Math.PI)
+//         halfRootAngleSin.push(Math.sin(0.5 * angle))
+//         halfRootAngleCos.push(Math.cos(0.5 * angle))
+
+//         let RotationAxis = new THREE.Vector3(0, 1, 0)
+//         let x = RotationAxis.x * Math.sin(angle / 2.0)
+//         let y = RotationAxis.y * Math.sin(angle / 2.0)
+//         let z = RotationAxis.z * Math.sin(angle / 2.0)
+//         let w = Math.cos(angle / 2.0)
+//         quaternion_0.set(x, y, z, w).normalize()
+
+//         //Rotate around X
+//         angle = Math.random() * (max - min) + min
+//         RotationAxis = new THREE.Vector3(1, 0, 0)
+//         x = RotationAxis.x * Math.sin(angle / 2.0)
+//         y = RotationAxis.y * Math.sin(angle / 2.0)
+//         z = RotationAxis.z * Math.sin(angle / 2.0)
+//         w = Math.cos(angle / 2.0)
+//         quaternion_1.set(x, y, z, w).normalize()
+
+//         //Combine rotations to a single quaternion
+//         quaternion_0 = multiplyQuaternions(quaternion_0, quaternion_1)
+
+//         //Rotate around Z
+//         angle = Math.random() * (max - min) + min
+//         RotationAxis = new THREE.Vector3(0, 0, 1)
+//         x = RotationAxis.x * Math.sin(angle / 2.0)
+//         y = RotationAxis.y * Math.sin(angle / 2.0)
+//         z = RotationAxis.z * Math.sin(angle / 2.0)
+//         w = Math.cos(angle / 2.0)
+//         quaternion_1.set(x, y, z, w).normalize()
+
+//         //Combine rotations to a single quaternion
+//         quaternion_0 = multiplyQuaternions(quaternion_0, quaternion_1)
+
+//         orientations.push(quaternion_0.x, quaternion_0.y, quaternion_0.z, quaternion_0.w)
+
+//         //Define variety in height
+//         if (i < instances / 3) {
+//             stretches.push(Math.random() * 1.8)
+//         } else {
+//             stretches.push(Math.random())
+//         }
+//     }
+
+//     return {
+//         offsets,
+//         orientations,
+//         stretches,
+//         halfRootAngleCos,
+//         halfRootAngleSin,
+//     }
+// }
 
 function multiplyQuaternions(
     q1: {

@@ -58,7 +58,7 @@ const Main = () => {
                 {/* <Clouds /> */}
                 {/* <Glass position={[0, 30, 0]} rotation={[Math.PI / 2, 0, 0]} scale={[2, 2, 2]} /> */}
 
-                {/* <AltGrass /> */}
+                <AltGrass />
 
                 <WaterPlane
                     size={mapSize}
@@ -66,9 +66,9 @@ const Main = () => {
                         position: [0, 3, 0],
                     }}
                 />
-                <Grass>
-                    <HeightMap size={mapSize} config={DEFAULT_CONTROL_VALUES} />
-                </Grass>
+                {/* <Grass> */}
+                <HeightMap size={mapSize} config={DEFAULT_CONTROL_VALUES} />
+                {/* </Grass> */}
             </Suspense>
 
             <PerspectiveCamera makeDefault ref={cameraRef} fov={fov} near={0.1} far={1000} position={[0, 30, -70]} />

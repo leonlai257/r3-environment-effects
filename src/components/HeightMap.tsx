@@ -7,6 +7,7 @@ import useFlipPlaneOnX from '../hooks/useFlipPlaneOnX'
 import useNoisyVertices from '../hooks/useNoisyVertices'
 import Perlin from 'perlin.js'
 import { ComputedAttribute } from '@react-three/drei'
+import { AltGrass } from './AltGrass'
 
 const computeGrassDensity = (geometry: THREE.BufferGeometry) => {
     const position = geometry.getAttribute('position') as BufferAttribute
@@ -60,7 +61,7 @@ interface HeightMapProps {
     size?: number
 }
 
-export const HeightMap = forwardRef(({ config, size }: HeightMapProps, ref: Ref<THREE.Mesh>) => {
+export const HeightMap = forwardRef(({ config, size }: HeightMapProps, ref?: Ref<THREE.Mesh>) => {
     const controls = useControls(config)
     // const ref = useRef<THREE.Mesh>(null)
     const planeGeom = useRef<THREE.BufferGeometry>(null!)
@@ -117,7 +118,7 @@ export const HeightMap = forwardRef(({ config, size }: HeightMapProps, ref: Ref<
     })
 
     useEffect(() => {
-        if (!ref.current || !planeGeom.current) {
+        if (!planeGeom.current) {
             return
         }
         planeGeom.current.setAttribute('position', new BufferAttribute(vertices, 3))
@@ -127,6 +128,7 @@ export const HeightMap = forwardRef(({ config, size }: HeightMapProps, ref: Ref<
 
     return (
         <mesh ref={ref} rotation={[-Math.PI / 2, 0, 0]}>
+            <AltGrass vertices={vertices} />
             <planeBufferGeometry args={[size, size, controls.resolution, controls.resolution]} ref={planeGeom}>
                 <ComputedAttribute name="grassDensity" compute={computeGrassDensity} usage={THREE.StaticReadUsage} />
             </planeBufferGeometry>
