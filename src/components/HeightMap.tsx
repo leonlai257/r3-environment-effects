@@ -1,4 +1,4 @@
-import { useLoader } from '@react-three/fiber'
+import { invalidate, useLoader } from '@react-three/fiber'
 import { useControls } from 'leva'
 import { ForwardedRef, Ref, forwardRef, useEffect, useRef } from 'react'
 import * as THREE from 'three'
@@ -13,13 +13,18 @@ const computeGrassDensity = (geometry: THREE.BufferGeometry) => {
     const position = geometry.getAttribute('position') as BufferAttribute
     const density = []
     const vertex = new THREE.Vector3()
-    for (let i = 0; i < position.count; i++) {
+    console.log(position)
+    for (let i = 0; i < position.count; i += 3) {
         vertex.fromBufferAttribute(position, i)
+
         const p = vertex.clone().multiplyScalar(1)
         const n = Perlin.simplex3(...p.toArray())
         let m = THREE.MathUtils.mapLinear(n, -1, 1, 0, 1)
-        if (m > 0.15) m = 0
-        density.push(m)
+
+        if (m > 0.5 && i <= 5.0) m = 0
+        for (let i = 0; i < 3; i++) {
+            density.push(m)
+        }
     }
     return new THREE.Float32BufferAttribute(density, 1)
 }
@@ -61,7 +66,7 @@ interface HeightMapProps {
     size?: number
 }
 
-export const HeightMap = forwardRef(({ config, size }: HeightMapProps, ref?: Ref<THREE.Mesh>) => {
+export const HeightMap = forwardRef(({ config, size }: HeightMapProps, ref?: ForwardedRef<THREE.Mesh>) => {
     const controls = useControls(config)
     // const ref = useRef<THREE.Mesh>(null)
     const planeGeom = useRef<THREE.BufferGeometry>(null!)
@@ -69,15 +74,6 @@ export const HeightMap = forwardRef(({ config, size }: HeightMapProps, ref?: Ref
     let vertices = useNoisyVertices(controls, {
         ...controls,
     })
-
-    vertices = vertices.map((vertex: any, index) => {
-        if ((index + 1) % 3 === 0) {
-            vertex = vertex * 1
-        }
-        return vertex
-    })
-
-    console.log('vertices: ', vertices)
 
     const gradientTexture = useLoader(THREE.TextureLoader, '/heightmap/biomeGradientMap.png')
     // const gradientTexture = useLoader(THREE.TextureLoader, '/heightmap/heatGradientMap.png')
@@ -88,10 +84,10 @@ export const HeightMap = forwardRef(({ config, size }: HeightMapProps, ref?: Ref
                 value: gradientTexture,
             },
             limits: {
-                value: config.limits.value || 0.4,
+                value: controls.limits || 0.4,
             },
             height: {
-                value: config.maxHeight.value || 3.5,
+                value: controls.maxHeight || 3.5,
             },
         },
         vertexShader: `
@@ -128,7 +124,7 @@ export const HeightMap = forwardRef(({ config, size }: HeightMapProps, ref?: Ref
 
     return (
         <mesh ref={ref} rotation={[-Math.PI / 2, 0, 0]}>
-            <AltGrass vertices={vertices} />
+            {/* <AltGrass vertices={vertices} /> */}
             <planeBufferGeometry args={[size, size, controls.resolution, controls.resolution]} ref={planeGeom}>
                 <ComputedAttribute name="grassDensity" compute={computeGrassDensity} usage={THREE.StaticReadUsage} />
             </planeBufferGeometry>

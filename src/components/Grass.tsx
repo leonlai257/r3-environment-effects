@@ -1,12 +1,14 @@
 import React, { JSXElementConstructor, ReactElement, ReactNode, useEffect, useRef } from 'react'
 import * as THREE from 'three'
-import { ThreeElements, extend, useFrame } from '@react-three/fiber'
+import { ThreeElements, extend, invalidate, useFrame } from '@react-three/fiber'
 import { Depth, LayerMaterial } from 'lamina'
-import { Sampler } from '@react-three/drei'
+import { Sampler, useSurfaceSampler } from '@react-three/drei'
 import WindLayer from '../shaders/windLayer'
 import { Flower } from './Flower'
 import Perlin from 'perlin.js'
 import { DepthProps } from 'lamina/types'
+import { HeightMapConfig } from './HeightMap'
+import { useControls } from 'leva'
 
 declare global {
     namespace JSX {
@@ -19,26 +21,40 @@ declare global {
 Perlin.seed(Math.random())
 extend({ WindLayer })
 
+type ControlConfig = {
+    value: number
+    min: number
+    max: number
+    step: number
+}
+
 type GrassProps = {
     children: ReactElement<any, string | JSXElementConstructor<any>>
-    strands?: number
+    config: {
+        strands: ControlConfig
+    }
     props?: any
 }
 
-export const Grass = ({ children, strands = 1000, ...props }: GrassProps) => {
+export const Grass = ({ children, config, ...props }: GrassProps) => {
+    const controls = useControls(config)
     const grassInstanceRef = useRef<THREE.InstancedMesh>(null!)
     const flowerRef = useRef<THREE.InstancedMesh>(null!)
     const windLayer = useRef<DepthProps>(null!)
     const geomRef = useRef<THREE.Mesh>(null!)
+    const grassSamplerRef = useRef<any>(null!)
+
     useEffect(() => {
-        console.log(children)
-        console.log(geomRef)
         grassInstanceRef.current.geometry.applyMatrix4(new THREE.Matrix4().makeRotationX(Math.PI / 2))
         grassInstanceRef.current.geometry.applyMatrix4(new THREE.Matrix4().makeTranslation(0, 0, 0.5))
 
         // flowerRef.current.geometry.applyMatrix4(new THREE.Matrix4().makeRotationX(Math.PI / 2))
         // flowerRef.current.geometry.applyMatrix4(new THREE.Matrix4().makeTranslation(0, 0, 0.5))
-    }, [])
+    })
+
+    useEffect(() => {
+        invalidate()
+    }, [controls])
 
     useFrame(() => (windLayer.current.time += 0.005))
     return (
@@ -46,7 +62,7 @@ export const Grass = ({ children, strands = 1000, ...props }: GrassProps) => {
             {React.cloneElement(children, { ref: geomRef })}
 
             {/* <Flower ref={flowerRef} /> */}
-            <instancedMesh ref={grassInstanceRef} args={[undefined, undefined, strands]}>
+            <instancedMesh ref={grassInstanceRef} args={[undefined, undefined, controls.strands]}>
                 <coneGeometry args={[0.05, 1.0, 2, 20, false, 0, Math.PI]} />
                 <LayerMaterial side={THREE.DoubleSide} lighting="physical" envMapIntensity={1}>
                     <Depth colorA="#221600" colorB="#ade266" near={0.14} far={1.52} mapping={'world'} />
@@ -62,9 +78,10 @@ export const Grass = ({ children, strands = 1000, ...props }: GrassProps) => {
                     />
                 </LayerMaterial>
             </instancedMesh>
-            <group rotation={[0, 0, Math.PI / 2]}>
+            <group>
                 <Sampler
-                    count={strands}
+                    ref={grassSamplerRef}
+                    count={controls.strands}
                     matrixAutoUpdate
                     matrixWorldNeedsUpdate
                     transform={({ sampledMesh, position, normal, dummy: object }) => {

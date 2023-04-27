@@ -1,4 +1,4 @@
-import { AltGrass, Grass, Glass, HeightMap, Clouds, WaterPlane } from '@/components'
+import { AltGrass, Grass, Glass, HeightMap, Clouds, WaterPlane, SkyBox } from '@/components'
 import { OrbitControls, PerspectiveCamera, Plane, Sky, Sphere } from '@react-three/drei'
 import { Suspense, createRef, useState } from 'react'
 import { DepthOfField, EffectComposer } from '@react-three/postprocessing'
@@ -41,6 +41,18 @@ export const DEFAULT_CONTROL_VALUES = {
         max: 1,
         step: 0.05,
     },
+    strands: {
+        value: 1000,
+        min: 0,
+        max: 20000,
+        step: 100,
+    },
+    time: {
+        value: 0.9,
+        min: 0,
+        max: 1,
+        step: 0.05,
+    },
 }
 
 const Main = () => {
@@ -54,11 +66,9 @@ const Main = () => {
         <>
             {/* <fog attach="fog" args={['hotpink', 20, 200]} /> */}
             <Suspense fallback={null}>
-                <Sky />
+                <SkyBox config={DEFAULT_CONTROL_VALUES} />
                 {/* <Clouds /> */}
                 {/* <Glass position={[0, 30, 0]} rotation={[Math.PI / 2, 0, 0]} scale={[2, 2, 2]} /> */}
-
-                <AltGrass />
 
                 <WaterPlane
                     size={mapSize}
@@ -66,18 +76,16 @@ const Main = () => {
                         position: [0, 3, 0],
                     }}
                 />
-                {/* <Grass> */}
-                <HeightMap size={mapSize} config={DEFAULT_CONTROL_VALUES} />
-                {/* </Grass> */}
+                {/* <HeightMap size={mapSize} config={DEFAULT_CONTROL_VALUES} /> */}
+
+                <Grass config={DEFAULT_CONTROL_VALUES}>
+                    <HeightMap size={mapSize} config={DEFAULT_CONTROL_VALUES} />
+                </Grass>
             </Suspense>
 
             <PerspectiveCamera makeDefault ref={cameraRef} fov={fov} near={0.1} far={1000} position={[0, 30, -70]} />
             {/* <EffectComposer>
-                <DepthOfField
-                    focusDistance={0} 
-                    focalLength={0.02} 
-                    bokehScale={2} 
-                />
+                <DepthOfField focusDistance={0} focalLength={0.02} bokehScale={2} />
             </EffectComposer> */}
 
             <OrbitControls enableZoom={true} enableRotate={true} />
