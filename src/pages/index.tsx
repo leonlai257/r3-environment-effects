@@ -1,7 +1,8 @@
 import { AltGrass, Grass, Glass, HeightMap, Clouds, WaterPlane, SkyBox } from '@/components'
-import { OrbitControls, PerspectiveCamera, Plane, Sky, Sphere } from '@react-three/drei'
+import { Environment, OrbitControls, PerspectiveCamera, Plane, Sky, Sphere } from '@react-three/drei'
 import { Suspense, createRef, useState } from 'react'
 import { DepthOfField, EffectComposer } from '@react-three/postprocessing'
+import { useControls } from 'leva'
 
 export const DEFAULT_CONTROL_VALUES = {
     seed: 'React3-Environment-Test',
@@ -68,7 +69,7 @@ const Main = () => {
             <Suspense fallback={null}>
                 <SkyBox config={DEFAULT_CONTROL_VALUES} />
                 {/* <Clouds /> */}
-                {/* <Glass position={[0, 30, 0]} rotation={[Math.PI / 2, 0, 0]} scale={[2, 2, 2]} /> */}
+                <Glass position={[0, 30, 0]} rotation={[Math.PI / 2, 0, 0]} scale={[2, 2, 2]} />
 
                 <WaterPlane
                     size={mapSize}
@@ -81,11 +82,12 @@ const Main = () => {
                 <Grass config={DEFAULT_CONTROL_VALUES}>
                     <HeightMap size={mapSize} config={DEFAULT_CONTROL_VALUES} />
                 </Grass>
+                <Environment preset="city"></Environment>
             </Suspense>
 
             <PerspectiveCamera makeDefault ref={cameraRef} fov={fov} near={0.1} far={1000} position={[0, 30, -70]} />
             {/* <EffectComposer>
-                <DepthOfField focusDistance={0} focalLength={0.02} bokehScale={2} />
+                <DepthOfField focusDistance={0.05} focalLength={0.02} bokehScale={2} />
             </EffectComposer> */}
 
             <OrbitControls enableZoom={true} enableRotate={true} />

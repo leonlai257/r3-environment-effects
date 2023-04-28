@@ -1,8 +1,21 @@
-import { Box, Caustics, Cylinder, Environment, MeshRefractionMaterial, MeshTransmissionMaterial, Sphere } from '@react-three/drei'
+import {
+    Box,
+    Caustics,
+    Cylinder,
+    Environment,
+    MeshReflectorMaterial,
+    MeshRefractionMaterial,
+    MeshTransmissionMaterial,
+    Sphere,
+} from '@react-three/drei'
 import { ThreeElements } from '@react-three/fiber'
 import React from 'react'
+import * as THREE from 'three'
+import { WorldEnvironment } from '@src/components'
 
 export const Glass = (props: ThreeElements['mesh']) => {
+    const glassTexture = new THREE.TextureLoader().load('/envMap/pinkSceneEnvMap.jpeg')
+
     return (
         // <Caustics
         //     backside
@@ -14,17 +27,17 @@ export const Glass = (props: ThreeElements['mesh']) => {
         //     backsideIOR={1.26}
         //     causticsOnly={false}>
         <Cylinder args={[8, 8, 1, 32]} {...props}>
-            <Environment preset={'studio'} />
-            {/* <MeshRefractionMaterial bounces={3} aberrationStrength={0} envMap={texture} toneMapped={false} /> */}
+            <Environment preset={'city'} />
+            {/* <WorldEnvironment /> */}
+
             <MeshTransmissionMaterial
                 color={'pink'}
-                thickness={0.2}
-                chromaticAberration={0.05}
-                anisotropy={1.5}
+                thickness={10.0}
+                chromaticAberration={0.3}
+                anisotropy={0.8}
                 clearcoat={1}
                 clearcoatRoughness={0.2}
-                envMapIntensity={3}
-                distortionScale={0}
+                distortionScale={0.1}
                 temporalDistortion={0}
             />
         </Cylinder>
