@@ -1,4 +1,4 @@
-import React, { JSXElementConstructor, ReactElement, ReactNode, useEffect, useRef } from 'react'
+import React, { JSXElementConstructor, ReactElement, ReactNode, useEffect, useRef, useState } from 'react'
 import * as THREE from 'three'
 import { ThreeElements, extend, invalidate, useFrame } from '@react-three/fiber'
 import { Depth, LayerMaterial } from 'lamina'
@@ -36,7 +36,7 @@ type GrassProps = {
     props?: any
 }
 
-export const Grass = ({ children, config, ...props }: GrassProps) => {
+export function Grass({ children, config, ...props }: GrassProps) {
     const controls = useControls(config)
     const grassInstanceRef = useRef<THREE.InstancedMesh>(null!)
     const flowerRef = useRef<THREE.InstancedMesh>(null!)
@@ -50,7 +50,7 @@ export const Grass = ({ children, config, ...props }: GrassProps) => {
 
         // flowerRef.current.geometry.applyMatrix4(new THREE.Matrix4().makeRotationX(Math.PI / 2))
         // flowerRef.current.geometry.applyMatrix4(new THREE.Matrix4().makeTranslation(0, 0, 0.5))
-    })
+    }, [])
 
     useEffect(() => {
         invalidate()

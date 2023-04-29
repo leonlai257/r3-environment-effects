@@ -12,17 +12,19 @@ import { AltGrass } from './AltGrass'
 const computeGrassDensity = (geometry: THREE.BufferGeometry) => {
     const position = geometry.getAttribute('position') as BufferAttribute
     const density = []
-    const vertex = new THREE.Vector3()
-    console.log(position)
+    let vertex = new THREE.Vector3()
+    let vertexZ = 0
     for (let i = 0; i < position.count; i += 3) {
         vertex.fromBufferAttribute(position, i)
-
         const p = vertex.clone().multiplyScalar(1)
         const n = Perlin.simplex3(...p.toArray())
         let m = THREE.MathUtils.mapLinear(n, -1, 1, 0, 1)
 
-        if (m > 0.5 && i <= 5.0) m = 0
-        for (let i = 0; i < 3; i++) {
+        vertexZ = vertex.fromBufferAttribute(position, i - 1).z
+        // console.log(vertexZ)
+        if (m < 0.15) m = 0
+        // if (vertexZ <= 10.0) m = 0
+        for (let j = 0; j <= 3; j++) {
             density.push(m)
         }
     }
@@ -66,7 +68,8 @@ interface HeightMapProps {
     size?: number
 }
 
-export const HeightMap = forwardRef(({ config, size }: HeightMapProps, ref?: ForwardedRef<THREE.Mesh>) => {
+export const HeightMap = forwardRef((props: HeightMapProps, ref?: ForwardedRef<THREE.Mesh>) => {
+    const { config, size = 100 } = props
     const controls = useControls(config)
     // const ref = useRef<THREE.Mesh>(null)
     const planeGeom = useRef<THREE.BufferGeometry>(null!)
@@ -116,6 +119,8 @@ export const HeightMap = forwardRef(({ config, size }: HeightMapProps, ref?: For
     useEffect(() => {
         if (!planeGeom.current) {
             return
+        } else {
+            invalidate()
         }
         planeGeom.current.setAttribute('position', new BufferAttribute(vertices, 3))
         planeGeom.current.attributes.position.needsUpdate = true

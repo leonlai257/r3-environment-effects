@@ -88,10 +88,10 @@ export function getAttributeData(instances: number, width: number, vertices) {
     const max = 0.25
 
     //For each instance of the grass blade
-    for (let i = 0; i <= vertices.length; i += 3) {
-        const vertexX = vertices[i]
-        const vertexY = vertices[i + 1]
-        const vertexZ = vertices[i + 2]
+    for (let i = 1; i <= vertices.length; i += 3) {
+        const vertexX = vertices[i - 1]
+        const vertexY = vertices[i]
+        const vertexZ = vertices[i + 1]
 
         // disable grass below a certain height
         if (vertexZ < 5) continue
@@ -107,7 +107,7 @@ export function getAttributeData(instances: number, width: number, vertices) {
             let angle = Math.PI - Math.random() * (2 * Math.PI)
             halfRootAngleSin.push(Math.sin(0.5 * angle))
             halfRootAngleCos.push(Math.cos(0.5 * angle))
-            console.log(Math.sin(angle / 2.0))
+            // console.log(Math.sin(angle / 2.0))
 
             let RotationAxis = new THREE.Vector3(0, 1, 0)
             let x = RotationAxis.x * Math.sin(angle / 2.0)

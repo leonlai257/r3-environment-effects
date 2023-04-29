@@ -68,7 +68,7 @@ const Main = () => {
             {/* <fog attach="fog" args={['hotpink', 20, 200]} /> */}
             <Suspense fallback={null}>
                 <SkyBox config={DEFAULT_CONTROL_VALUES} />
-                {/* <Clouds /> */}
+                <Clouds />
                 <Glass position={[0, 30, 0]} rotation={[Math.PI / 2, 0, 0]} scale={[2, 2, 2]} />
 
                 <WaterPlane
@@ -82,13 +82,13 @@ const Main = () => {
                 <Grass config={DEFAULT_CONTROL_VALUES}>
                     <HeightMap size={mapSize} config={DEFAULT_CONTROL_VALUES} />
                 </Grass>
-                <Environment preset="city"></Environment>
+                <Environment preset="sunset" />
             </Suspense>
 
             <PerspectiveCamera makeDefault ref={cameraRef} fov={fov} near={0.1} far={1000} position={[0, 30, -70]} />
-            {/* <EffectComposer>
-                <DepthOfField focusDistance={0.05} focalLength={0.02} bokehScale={2} />
-            </EffectComposer> */}
+            <EffectComposer>
+                <DepthOfField focusDistance={0.1} focalLength={0.1} bokehScale={4.0} />
+            </EffectComposer>
 
             <OrbitControls enableZoom={true} enableRotate={true} />
         </>
