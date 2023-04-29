@@ -25,7 +25,6 @@ export const Glass = (props: ThreeElements['mesh']) => {
         //     backsideIOR={1.26}
         //     causticsOnly={false}>
         <Cylinder args={[8, 8, 1, 32]} {...props}>
-            <Environment preset="sunset" />
             {/* <WorldEnvironment /> */}
 
             <MeshTransmissionMaterial
