@@ -1,17 +1,5 @@
-import {
-    Box,
-    Caustics,
-    Cylinder,
-    Environment,
-    MeshReflectorMaterial,
-    MeshRefractionMaterial,
-    MeshTransmissionMaterial,
-    Sphere,
-} from '@react-three/drei'
+import { Cylinder, MeshTransmissionMaterial } from '@react-three/drei'
 import { ThreeElements } from '@react-three/fiber'
-import React from 'react'
-import * as THREE from 'three'
-import { WorldEnvironment } from '@src/components'
 
 export const Glass = (props: ThreeElements['mesh']) => {
     return (
@@ -24,15 +12,13 @@ export const Glass = (props: ThreeElements['mesh']) => {
         //     ior={0.6}
         //     backsideIOR={1.26}
         //     causticsOnly={false}>
-        <Cylinder args={[8, 8, 1, 32]} {...props}>
-            {/* <WorldEnvironment /> */}
-
+        <Cylinder args={[8, 8, 1, 64]} {...props}>
             <MeshTransmissionMaterial
                 color={'pink'}
                 thickness={10.0}
                 chromaticAberration={0.3}
                 anisotropy={0.8}
-                reflectivity={0.2}
+                reflectivity={0.5}
                 clearcoat={1}
                 clearcoatRoughness={0.2}
                 distortionScale={0.1}

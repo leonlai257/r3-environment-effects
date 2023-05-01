@@ -1,8 +1,8 @@
 import { AltGrass, Grass, Glass, HeightMap, Clouds, WaterPlane, SkyBox } from '@/components'
-import { Environment, OrbitControls, PerspectiveCamera, Plane, Sky, Sphere } from '@react-three/drei'
+import { Environment, OrbitControls, PerspectiveCamera, Plane, Sky, Sphere, useDetectGPU } from '@react-three/drei'
 import { Suspense, createRef, useState } from 'react'
 import { DepthOfField, EffectComposer } from '@react-three/postprocessing'
-import { useControls } from 'leva'
+import { WorldEnvironment } from '@src/components'
 
 export const DEFAULT_CONTROL_VALUES = {
     seed: 'React3-Environment-Test',
@@ -45,7 +45,7 @@ export const DEFAULT_CONTROL_VALUES = {
     strands: {
         value: 1000,
         min: 0,
-        max: 20000,
+        max: 500000,
         step: 100,
     },
     time: {
@@ -62,10 +62,12 @@ const Main = () => {
     const [fov] = useState(75)
 
     const mapSize = 10
+    const GPUTier = useDetectGPU()
+    console.log(GPUTier.tier === 0 || GPUTier.isMobile ? 'low-setting' : 'high-setting')
 
     return (
         <>
-            {/* <fog attach="fog" args={['hotpink', 20, 200]} /> */}
+            <fog attach="fog" args={['hotpink', 20, 200]} />
             <Suspense fallback={null}>
                 <SkyBox config={DEFAULT_CONTROL_VALUES} />
                 <Clouds />
@@ -83,12 +85,13 @@ const Main = () => {
                     <HeightMap size={mapSize} config={DEFAULT_CONTROL_VALUES} />
                 </Grass>
                 <Environment preset="sunset" />
+                {/* <WorldEnvironment /> */}
             </Suspense>
 
             <PerspectiveCamera makeDefault ref={cameraRef} fov={fov} near={0.1} far={1000} position={[0, 30, -70]} />
-            <EffectComposer>
+            {/* <EffectComposer>
                 <DepthOfField focusDistance={0.1} focalLength={0.1} bokehScale={4.0} />
-            </EffectComposer>
+            </EffectComposer> */}
 
             <OrbitControls enableZoom={true} enableRotate={true} />
         </>

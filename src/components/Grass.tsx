@@ -62,7 +62,7 @@ export function Grass({ children, config, ...props }: GrassProps) {
             {React.cloneElement(children, { ref: geomRef })}
 
             {/* <Flower ref={flowerRef} /> */}
-            <instancedMesh ref={grassInstanceRef} args={[undefined, undefined, controls.strands]}>
+            <instancedMesh ref={grassInstanceRef} args={[undefined, undefined, controls.strands]} castShadow>
                 <coneGeometry args={[0.05, 1.0, 2, 20, false, 0, Math.PI]} />
                 <LayerMaterial side={THREE.DoubleSide} lighting="physical" envMapIntensity={1}>
                     <Depth colorA="#221600" colorB="#ade266" near={0.14} far={1.52} mapping={'world'} />

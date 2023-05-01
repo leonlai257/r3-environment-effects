@@ -128,7 +128,7 @@ export const HeightMap = forwardRef((props: HeightMapProps, ref?: ForwardedRef<T
     }, [vertices, ref, planeGeom])
 
     return (
-        <mesh ref={ref} rotation={[-Math.PI / 2, 0, 0]}>
+        <mesh ref={ref} rotation={[-Math.PI / 2, 0, 0]} castShadow receiveShadow>
             {/* <AltGrass vertices={vertices} /> */}
             <planeBufferGeometry args={[size, size, controls.resolution, controls.resolution]} ref={planeGeom}>
                 <ComputedAttribute name="grassDensity" compute={computeGrassDensity} usage={THREE.StaticReadUsage} />
