@@ -3,6 +3,7 @@ import { Environment, OrbitControls, PerspectiveCamera, Plane, Sky, Sphere, useD
 import { Suspense, createRef, useState } from 'react'
 import { DepthOfField, EffectComposer } from '@react-three/postprocessing'
 import { WorldEnvironment } from '@src/components'
+import { useFrame, useThree } from '@react-three/fiber'
 
 export const DEFAULT_CONTROL_VALUES = {
     seed: 'React3-Environment-Test',
@@ -58,12 +59,33 @@ export const DEFAULT_CONTROL_VALUES = {
 
 const Main = () => {
     const cameraRef = createRef()
+    const { camera } = useThree()
 
-    const [fov] = useState(75)
+    const [fov, setFov] = useState(75)
+
+    const defaultCameraPosition = {
+        x: 0,
+        y: 0,
+        z: 0,
+    }
 
     const mapSize = 10
     const GPUTier = useDetectGPU()
     console.log(GPUTier.tier === 0 || GPUTier.isMobile ? 'low-setting' : 'high-setting')
+
+    const [transition, setTransition] = useState<string>('')
+
+    useFrame(() => {
+        if (transition) {
+            setFov(fov - 1)
+        }
+        if (fov <= 30) {
+            if (transition === 'transition-in') {
+                setFov(75)
+            }
+            setTransition('')
+        }
+    })
 
     return (
         <>
