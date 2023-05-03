@@ -1,7 +1,14 @@
 import { Cylinder, MeshTransmissionMaterial } from '@react-three/drei'
 import { ThreeElements } from '@react-three/fiber'
+import { ForwardedRef, forwardRef, useState } from 'react'
 
-export const Glass = (props: ThreeElements['mesh']) => {
+export type GlassProps = {
+    onClick: () => void
+    props?: ThreeElements['mesh']
+}
+
+export const Glass = forwardRef(({ onClick, props }: GlassProps, ref: ForwardedRef<THREE.Mesh>) => {
+    const [hovered, setHover] = useState(false)
     return (
         // <Caustics
         //     backside
@@ -12,9 +19,10 @@ export const Glass = (props: ThreeElements['mesh']) => {
         //     ior={0.6}
         //     backsideIOR={1.26}
         //     causticsOnly={false}>
-        <Cylinder args={[8, 8, 1, 64]} {...props}>
+        <mesh ref={ref} {...props} onClick={() => onClick()} onPointerOver={() => setHover(true)} onPointerOut={() => setHover(false)}>
+            <cylinderGeometry args={[8, 8, 1, 64]} />
             <MeshTransmissionMaterial
-                color={'pink'}
+                color={hovered ? 'blue' : 'pink'}
                 thickness={10.0}
                 chromaticAberration={0.3}
                 anisotropy={0.8}
@@ -24,7 +32,8 @@ export const Glass = (props: ThreeElements['mesh']) => {
                 distortionScale={0.1}
                 temporalDistortion={0}
             />
-        </Cylinder>
+        </mesh>
+
         // </Caustics>
     )
-}
+})

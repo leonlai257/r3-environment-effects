@@ -7,8 +7,8 @@ import WindLayer from '../shaders/windLayer'
 import { Flower } from './Flower'
 import Perlin from 'perlin.js'
 import { DepthProps } from 'lamina/types'
-import { HeightMapConfig } from './HeightMap'
 import { useControls } from 'leva'
+import { ControlConfigType } from '@/types'
 
 declare global {
     namespace JSX {
@@ -21,18 +21,9 @@ declare global {
 Perlin.seed(Math.random())
 extend({ WindLayer })
 
-type ControlConfig = {
-    value: number
-    min: number
-    max: number
-    step: number
-}
-
 type GrassProps = {
     children: ReactElement<any, string | JSXElementConstructor<any>>
-    config: {
-        strands: ControlConfig
-    }
+    config: ControlConfigType
     props?: any
 }
 
@@ -52,9 +43,9 @@ export function Grass({ children, config, ...props }: GrassProps) {
         // flowerRef.current.geometry.applyMatrix4(new THREE.Matrix4().makeTranslation(0, 0, 0.5))
     }, [])
 
-    useEffect(() => {
-        invalidate()
-    }, [controls])
+    // useEffect(() => {
+    //     invalidate()
+    // }, [controls])
 
     useFrame(() => (windLayer.current.time += 0.005))
     return (

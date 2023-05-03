@@ -8,6 +8,7 @@ import useNoisyVertices from '../hooks/useNoisyVertices'
 import Perlin from 'perlin.js'
 import { ComputedAttribute } from '@react-three/drei'
 import { AltGrass } from './AltGrass'
+import { ControlConfigType } from '@/types'
 
 const computeGrassDensity = (geometry: THREE.BufferGeometry) => {
     const position = geometry.getAttribute('position') as BufferAttribute
@@ -46,25 +47,8 @@ const computeFlowerDensity = (geometry: THREE.BufferGeometry) => {
     return new THREE.Float32BufferAttribute(density, 1)
 }
 
-type ControlConfig = {
-    value: number
-    min: number
-    max: number
-    step: number
-}
-
-export type HeightMapConfig = {
-    seed: string
-    resolution: ControlConfig
-    maxHeight: ControlConfig
-    frequency: ControlConfig
-    exponent: ControlConfig
-    octaves: ControlConfig
-    limits: ControlConfig
-}
-
 interface HeightMapProps {
-    config: HeightMapConfig
+    config: ControlConfigType
     size?: number
 }
 
