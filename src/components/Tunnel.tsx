@@ -1,19 +1,24 @@
-import { ThreeElements, useLoader } from '@react-three/fiber'
+import { ThreeElements, useFrame, useLoader, useThree } from '@react-three/fiber'
 import { createRef, useState } from 'react'
 import * as THREE from 'three'
 
 export type TunnelProps = {
+    speed?: number
     radius?: number
     length?: number
     props?: ThreeElements['mesh']
 }
 
-export const Tunnel = ({ radius = 16, length = 50, props }: TunnelProps) => {
+export const Tunnel = ({ speed = 10, radius = 16, length = 50, props }: TunnelProps) => {
     const materialRef = createRef<THREE.MeshBasicMaterial>()
+    const vec = new THREE.Vector3()
+    const { mouse, camera } = useThree()
+    const cameraOffset: number = 10
+
     const texture = useLoader(THREE.TextureLoader, '/textures/galaxyTexture.jpeg')
     texture.wrapS = THREE.MirroredRepeatWrapping
     texture.wrapT = THREE.MirroredRepeatWrapping
-    texture.repeat.set(texture.repeat.x, texture.repeat.y)
+    texture.repeat.set(4, 10)
 
     const [curve] = useState(() => {
         // Create an empty array to stores the points
@@ -29,10 +34,17 @@ export const Tunnel = ({ radius = 16, length = 50, props }: TunnelProps) => {
     // let tubeGeometry = new THREE.TubeGeometry(curve, 70, 0.02, 30, false);
     // let tubeGeometry_o = tubeGeometry.clone();
 
+    useFrame(() => {
+        texture.offset.x -= 0.02
+        texture.offset.y += 0.01
+
+        camera.position.lerp(vec.set(-mouse.x * cameraOffset, 30 - mouse.y * cameraOffset, -100), 0.05)
+    })
+
     return (
         <mesh {...props}>
             <tubeGeometry args={[curve, 70, radius, length, false]} />
-            <meshBasicMaterial ref={materialRef} map={texture} side={THREE.DoubleSide} />
+            <meshBasicMaterial ref={materialRef} map={texture} side={THREE.BackSide} />
         </mesh>
     )
 }
