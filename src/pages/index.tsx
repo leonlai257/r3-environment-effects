@@ -17,6 +17,7 @@ import { DepthOfField, EffectComposer } from '@react-three/postprocessing'
 import { useFrame, useThree } from '@react-three/fiber'
 import { ControlConfigType } from '@/types'
 import * as THREE from 'three'
+import BlurTransition from '@/effects/blurTransition'
 
 export const DEFAULT_CONTROL_VALUES: ControlConfigType = {
     seed: 'React3-Environment-Test',
@@ -81,19 +82,24 @@ const Main = () => {
 
     const [fov, setFov] = useState(75)
     const [transition, setTransition] = useState<string>('')
-    const [animation, setAnimation] = useState<AnimationType>('fadeOut')
+    const [animation, setAnimation] = useState<AnimationType>('')
 
     const defaultFocalLength = camera.getFocalLength()
     useFrame(() => {
+        // if (transition) {
+        //     camera.setFocalLength(camera.getFocalLength() + 0.5)
+        // }
+        // if (camera.fov <= 30) {
+        //     if (transition === 'room') {
+        //         camera.setFocalLength(defaultFocalLength)
+        //     }
+        //     setTransition('')
+        // }
+
         if (transition) {
-            console.log(camera.fov)
-            camera.setFocalLength(camera.getFocalLength() + 0.5)
-        }
-        if (camera.fov <= 30) {
-            if (transition === 'room') {
-                camera.setFocalLength(defaultFocalLength)
-            }
-            setTransition('')
+            // setTimeout(() => {
+            //     setTransition('')
+            // }, 5000)
         }
     })
 
@@ -102,31 +108,30 @@ const Main = () => {
             camera.lookAt(new THREE.Vector3(glassRef.current.position.x, glassRef.current.position.y, glassRef.current.position.z))
             camera.updateProjectionMatrix()
         }
+        setAnimation('fadeInAndOut')
         setTransition('room')
     }
 
     return (
         <>
-            <Html as="div" fullscreen zIndexRange={[9999, 0]}>
-                <HtmlAnimation animation={animation == '' ? 'fadeOut' : animation} />
+            <Html
+                as="div"
+                fullscreen
+                zIndexRange={[9999, 0]}
+                style={{
+                    backgroundColor: 'transparent',
+                }}>
+                <HtmlAnimation animation={animation == '' ? 'enterScene' : animation} />
             </Html>
-            {/* <fog attach="fog" args={['hotpink', 20, 200]} /> */}
+            <fog attach="fog" args={['hotpink', 20, 200]} />
             <Suspense fallback={null}>
-                <Tunnel
-                    radius={16}
-                    length={50}
-                    props={{
-                        position: [0, 30, 0],
-                        rotation: [-Math.PI / 2, 0, 0],
-                    }}
-                />
                 <SkyBox config={DEFAULT_CONTROL_VALUES} />
                 {/* <Clouds /> */}
                 <Glass
                     ref={glassRef}
                     onClick={() => onGlassClick()}
                     props={{
-                        position: [0, 30, 0],
+                        position: [0, 40, 0],
                         rotation: [Math.PI / 2, 0, 0],
                         scale: [2, 2, 2],
                     }}
@@ -147,12 +152,33 @@ const Main = () => {
                 {/* <WorldEnvironment /> */}
             </Suspense>
 
+            {/* {transition && <BlurTransition />} */}
+
+            {/* <Tunnel
+                radius={16}
+                length={50}
+                props={{
+                    position: [0, 30, 0],
+                    rotation: [-Math.PI / 2, 0, 0],
+                }}
+            /> */}
+            {transition && (
+                <Tunnel
+                    position={[0, 30, 500]}
+                    radius={16}
+                    length={50}
+                    props={{
+                        rotation: [-Math.PI, 0, 0],
+                    }}
+                />
+            )}
+
             <PerspectiveCamera makeDefault fov={fov} near={0.1} far={1000} position={[0, 30, -70]} />
             {/* <EffectComposer>
                 <DepthOfField focusDistance={0.1} focalLength={0.1} bokehScale={4.0} />
             </EffectComposer> */}
 
-            <OrbitControls enableZoom={true} enableRotate={true} />
+            <OrbitControls enableZoom={true} enableRotate={transition ? false : true} />
         </>
     )
 }
