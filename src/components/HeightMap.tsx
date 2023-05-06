@@ -10,24 +10,51 @@ import { ComputedAttribute } from '@react-three/drei'
 import { AltGrass } from './AltGrass'
 import { ControlConfigType } from '@/types'
 
+function remap(x: number, [low1, high1]: number[], [low2, high2]: number[]) {
+    return low2 + ((x - low1) * (high2 - low2)) / (high1 - low1)
+}
+
 const computeGrassDensity = (geometry: THREE.BufferGeometry) => {
+    // const position = geometry.getAttribute('position') as BufferAttribute
+    // const density = []
+    // let vertex = new THREE.Vector3()
+    // let vertexZ = 0
+    // for (let i = 0; i < position.count; i += 3) {
+    //     vertex.fromBufferAttribute(position, i)
+    //     const p = vertex.clone().multiplyScalar(1)
+    //     const n = Perlin.simplex3(...p.toArray())
+    //     let m = THREE.MathUtils.mapLinear(n, -1, 1, 0, 1)
+
+    //     vertexZ = vertex.fromBufferAttribute(position, i - 1).z
+    //     // console.log(vertexZ)
+    //     if (vertexZ) {
+    //         if (vertexZ <= 10.0) m = 0
+    //     } else {
+    //         if (m < 0.15) m = 0
+    //     }
+    //     // if (vertexZ <= 10.0) m = 0
+    //     for (let j = 0; j <= 3; j++) {
+    //         density.push(m)
+    //     }
+    // }
+    // return new THREE.Float32BufferAttribute(density, 1)
+
     const position = geometry.getAttribute('position') as BufferAttribute
     const density = []
-    let vertex = new THREE.Vector3()
-    let vertexZ = 0
-    for (let i = 0; i < position.count; i += 3) {
-        vertex.fromBufferAttribute(position, i)
-        const p = vertex.clone().multiplyScalar(1)
-        const n = Perlin.simplex3(...p.toArray())
-        let m = THREE.MathUtils.mapLinear(n, -1, 1, 0, 1)
+    const normalVector = new THREE.Vector3()
+    const up = new THREE.Vector3(0, 0, 1)
 
-        vertexZ = vertex.fromBufferAttribute(position, i - 1).z
-        // console.log(vertexZ)
-        if (m < 0.15) m = 0
-        // if (vertexZ <= 10.0) m = 0
-        for (let j = 0; j <= 3; j++) {
-            density.push(m)
-        }
+    for (let i = 0; i < position.count; i++) {
+        const n = new THREE.Vector3()
+        n.fromBufferAttribute(position, i)
+        normalVector.set(n.x, n.y, n.z)
+        const dot = normalVector.dot(up)
+        const value = dot > 5.2 ? remap(dot, [0.1, 10], [0, 10]) : 0
+        density.push(value)
+
+        // for (let j = 0; j <= 3; j++) {
+        //     density.push(value)
+        // }
     }
     return new THREE.Float32BufferAttribute(density, 1)
 }
@@ -109,13 +136,14 @@ export const HeightMap = forwardRef((props: HeightMapProps, ref?: ForwardedRef<T
         planeGeom.current.setAttribute('position', new BufferAttribute(vertices, 3))
         planeGeom.current.attributes.position.needsUpdate = true
         planeGeom.current.computeVertexNormals()
+        planeGeom.current.setAttribute('grassDensity', computeGrassDensity(planeGeom.current))
     }, [vertices, ref, planeGeom])
 
     return (
         <mesh ref={ref} rotation={[-Math.PI / 2, 0, 0]} castShadow receiveShadow>
             {/* <AltGrass vertices={vertices} /> */}
             <planeBufferGeometry args={[size, size, controls.resolution, controls.resolution]} ref={planeGeom}>
-                <ComputedAttribute name="grassDensity" compute={computeGrassDensity} usage={THREE.StaticReadUsage} />
+                {/* <ComputedAttribute name="grassDensity" compute={computeGrassDensity} /> */}
             </planeBufferGeometry>
             <shaderMaterial
                 uniforms={CustomMaterial.uniforms}

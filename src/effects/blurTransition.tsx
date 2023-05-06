@@ -30,7 +30,7 @@ const BlurTransition = () => {
         // blend pass
         const blendPass = new ShaderPass(BlendShader, 'tDiffuse1')
         blendPass.uniforms['tDiffuse2'].value = savePass.renderTarget.texture
-        blendPass.uniforms['mixRatio'].value = 0.9
+        blendPass.uniforms['mixRatio'].value = 0.4
 
         // output pass
         const outputPass = new ShaderPass(CopyShader)

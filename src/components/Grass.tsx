@@ -56,13 +56,13 @@ export function Grass({ children, config, ...props }: GrassProps) {
             <instancedMesh ref={grassInstanceRef} args={[undefined, undefined, controls.strands]} castShadow>
                 <coneGeometry args={[0.05, 1.0, 2, 20, false, 0, Math.PI]} />
                 <LayerMaterial side={THREE.DoubleSide} lighting="physical" envMapIntensity={1}>
-                    <Depth colorA="#221600" colorB="#ade266" near={0.14} far={1.52} mapping={'world'} />
+                    <Depth colorA="#86608E" colorB="#ffddf4" near={0.14} far={1.24} mapping={'world'} />
                     <windLayer
                         args={[{ mode: 'multiply' }]}
-                        colorA={'#ffffff'}
-                        colorB={'#acf5ce'}
+                        colorA={'#ffddf4'}
+                        colorB={'#fddde6'}
                         noiseScale={10}
-                        noiseStrength={5}
+                        noiseStrength={1}
                         length={1.4}
                         sway={0.1}
                         ref={windLayer}

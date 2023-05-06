@@ -1,14 +1,21 @@
 import { Cylinder, MeshTransmissionMaterial } from '@react-three/drei'
-import { ThreeElements } from '@react-three/fiber'
+import { ThreeElements, useFrame } from '@react-three/fiber'
 import { ForwardedRef, forwardRef, useState } from 'react'
 
 export type GlassProps = {
     onClick: () => void
+    targetLocation?: THREE.Vector3
     props?: ThreeElements['mesh']
 }
 
-export const Glass = forwardRef(({ onClick, props }: GlassProps, ref: ForwardedRef<THREE.Mesh>) => {
+export const Glass = forwardRef(({ onClick, targetLocation, props }: GlassProps, ref: ForwardedRef<THREE.Mesh>) => {
     const [hovered, setHover] = useState(false)
+
+    useFrame(() => {
+        if (targetLocation && targetLocation !== ref.current?.position) {
+            ref.current?.position.lerp(targetLocation, 0.03)
+        }
+    })
     return (
         // <Caustics
         //     backside

@@ -14,7 +14,7 @@ import {
 import { Environment, Html, OrbitControls, PerspectiveCamera, Plane, Sky, Sphere, useDetectGPU } from '@react-three/drei'
 import { Suspense, createRef, useState } from 'react'
 import { DepthOfField, EffectComposer } from '@react-three/postprocessing'
-import { useFrame, useThree } from '@react-three/fiber'
+import { invalidate, useFrame, useThree } from '@react-three/fiber'
 import { ControlConfigType } from '@/types'
 import * as THREE from 'three'
 import BlurTransition from '@/effects/blurTransition'
@@ -58,7 +58,7 @@ export const DEFAULT_CONTROL_VALUES: ControlConfigType = {
         step: 0.05,
     },
     strands: {
-        value: 1000,
+        value: 50000,
         min: 0,
         max: 500000,
         step: 100,
@@ -75,17 +75,37 @@ const Main = () => {
     const glassRef = createRef<THREE.Mesh>()
     const state = useThree()
     const camera = state.camera as THREE.PerspectiveCamera
+    const cameraDefaultPosition = new THREE.Vector3(0, 30, -70)
 
     const mapSize = 10
     const GPUTier = useDetectGPU()
     console.log(GPUTier.tier === 0 || GPUTier.isMobile ? 'low-setting' : 'high-setting')
 
     const [fov, setFov] = useState(75)
-    const [transition, setTransition] = useState<string>('')
-    const [animation, setAnimation] = useState<AnimationType>('')
+    const [transition, setTransition] = useState<string>('enterScene')
+    const [animation, setAnimation] = useState<AnimationType>('enterScene')
 
     const defaultFocalLength = camera.getFocalLength()
+
     useFrame(() => {
+        if (transition === 'enterScene') {
+            setTimeout(() => {
+                invalidate()
+                setAnimation('leaveTunnelEnterWorld')
+            }, 2700)
+
+            setTimeout(() => {
+                setTransition('')
+                camera.position.set(cameraDefaultPosition.x, cameraDefaultPosition.y, cameraDefaultPosition.z)
+            }, 3000)
+        }
+
+        if (transition === 'room') {
+            setTimeout(() => {
+                setAnimation('fadeIn')
+            }, 5000)
+        }
+
         // if (transition) {
         //     camera.setFocalLength(camera.getFocalLength() + 0.5)
         // }
@@ -95,12 +115,6 @@ const Main = () => {
         //     }
         //     setTransition('')
         // }
-
-        if (transition) {
-            // setTimeout(() => {
-            //     setTransition('')
-            // }, 5000)
-        }
     })
 
     const onGlassClick = () => {
@@ -123,19 +137,24 @@ const Main = () => {
                 }}>
                 <HtmlAnimation animation={animation == '' ? 'enterScene' : animation} />
             </Html>
-            <fog attach="fog" args={['hotpink', 20, 200]} />
+            <fog attach="fog" args={['hotpink', 20, 240]} />
             <Suspense fallback={null}>
                 <SkyBox config={DEFAULT_CONTROL_VALUES} />
-                {/* <Clouds /> */}
-                <Glass
-                    ref={glassRef}
-                    onClick={() => onGlassClick()}
-                    props={{
-                        position: [0, 40, 0],
-                        rotation: [Math.PI / 2, 0, 0],
-                        scale: [2, 2, 2],
-                    }}
-                />
+                {transition !== 'enterScene' && (
+                    <group>
+                        <Clouds targetLocations={[new THREE.Vector3(50, 20, 80), new THREE.Vector3(-50, 20, 80)]} />
+                        <Glass
+                            ref={glassRef}
+                            onClick={() => onGlassClick()}
+                            targetLocation={new THREE.Vector3(0, 30, 0)}
+                            props={{
+                                position: [0, 100, 0],
+                                rotation: [Math.PI / 2, 0, 0],
+                                scale: [2, 2, 2],
+                            }}
+                        />
+                    </group>
+                )}
 
                 <WaterPlane
                     size={mapSize}
@@ -143,7 +162,6 @@ const Main = () => {
                         position: [0, 3, 0],
                     }}
                 />
-                {/* <HeightMap size={mapSize} config={DEFAULT_CONTROL_VALUES} /> */}
 
                 <Grass config={DEFAULT_CONTROL_VALUES}>
                     <HeightMap size={mapSize} config={DEFAULT_CONTROL_VALUES} />
@@ -154,14 +172,6 @@ const Main = () => {
 
             {/* {transition && <BlurTransition />} */}
 
-            {/* <Tunnel
-                radius={16}
-                length={50}
-                props={{
-                    position: [0, 30, 0],
-                    rotation: [-Math.PI / 2, 0, 0],
-                }}
-            /> */}
             {transition && (
                 <Tunnel
                     position={[0, 30, 500]}
@@ -173,7 +183,13 @@ const Main = () => {
                 />
             )}
 
-            <PerspectiveCamera makeDefault fov={fov} near={0.1} far={1000} position={[0, 30, -70]} />
+            <PerspectiveCamera
+                makeDefault
+                fov={fov}
+                near={0.1}
+                far={1000}
+                position={[cameraDefaultPosition.x, cameraDefaultPosition.y, cameraDefaultPosition.z]}
+            />
             {/* <EffectComposer>
                 <DepthOfField focusDistance={0.1} focalLength={0.1} bokehScale={4.0} />
             </EffectComposer> */}

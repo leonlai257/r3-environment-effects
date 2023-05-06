@@ -21,13 +21,13 @@ export const Tunnel = ({ position, speed = 10, radius = 16, length = 50, props }
     useEffect(() => {
         texture.wrapS = THREE.MirroredRepeatWrapping
         texture.wrapT = THREE.MirroredRepeatWrapping
-        texture.repeat.set(2, 10)
+        texture.repeat.set(2, 5)
         // camera.position.set(0, position[1], 100)
     }, [])
 
     const [curve, setCurve] = useState(() => {
         let points = []
-        for (let i = 0; i < 5; i += 1) {
+        for (let i = 0; i < 7; i += 1) {
             points.push(new THREE.Vector3(0, 0, 50 * i))
         }
         return new THREE.CatmullRomCurve3(points)
@@ -39,20 +39,20 @@ export const Tunnel = ({ position, speed = 10, radius = 16, length = 50, props }
         setCurve(() => {
             const newCurve = curve.clone()
             newCurve.points[2].x = radius * -mouse.x * 1.5
-            newCurve.points[2].y = radius * -mouse.y * 1.5
+            newCurve.points[2].y = radius * mouse.y * 1.5
             newCurve.points[3].x = 0
             newCurve.points[3].y = 0
             newCurve.points[4].x = radius * (1 - mouse.x)
             newCurve.points[4].y = radius * (1 - mouse.y)
+            newCurve.points[6].y = -50
 
-            // newCurve.points[4].x = -mouse.x * 0.1 * radius
             return newCurve
         })
 
-        texture.offset.x += 0.1
-        texture.offset.y += 0.03
-        if (texture.repeat.x >= 0.5) {
-            texture.repeat.x = texture.repeat.x - 0.02
+        texture.offset.x += 0.02
+        texture.offset.y += 0.005
+        if (texture.repeat.x >= 1) {
+            texture.repeat.x = texture.repeat.x - 0.002
         }
 
         camera.position.lerp(vec.set(-mouse.x * cameraOffset, position[1] - mouse.y * cameraOffset, position[2]), 0.05)
