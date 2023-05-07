@@ -138,7 +138,17 @@ const Main = () => {
                 <HtmlAnimation animation={animation == '' ? 'enterScene' : animation} />
             </Html>
             <fog attach="fog" args={['hotpink', 20, 240]} />
-            <Suspense fallback={null}>
+            <Suspense
+                fallback={
+                    <Tunnel
+                        position={[0, 30, 500]}
+                        radius={16}
+                        length={50}
+                        props={{
+                            rotation: [-Math.PI, 0, 0],
+                        }}
+                    />
+                }>
                 <SkyBox config={DEFAULT_CONTROL_VALUES} />
                 {transition !== 'enterScene' && (
                     <group>
