@@ -1,7 +1,6 @@
 export * from './Glass'
 export * from './HeightMap'
 export * from './WaterPlane'
-export * from './AltGrass'
 export * from './Grass'
 export * from './Glass'
 export * from './Clouds'

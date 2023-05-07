@@ -4,16 +4,17 @@ import { ForwardedRef, forwardRef, useState } from 'react'
 
 export type GlassProps = {
     onClick: () => void
+    lerpSpeed?: number
     targetLocation?: THREE.Vector3
     props?: ThreeElements['mesh']
 }
 
-export const Glass = forwardRef(({ onClick, targetLocation, props }: GlassProps, ref: ForwardedRef<THREE.Mesh>) => {
+export const Glass = forwardRef(({ onClick, lerpSpeed, targetLocation, props }: GlassProps, ref: ForwardedRef<THREE.Mesh>) => {
     const [hovered, setHover] = useState(false)
 
     useFrame(() => {
         if (targetLocation && targetLocation !== ref.current?.position) {
-            ref.current?.position.lerp(targetLocation, 0.03)
+            ref.current?.position.lerp(targetLocation, lerpSpeed || 0.03)
         }
     })
     return (

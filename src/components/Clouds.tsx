@@ -3,11 +3,13 @@ import { ThreeElements, useFrame } from '@react-three/fiber'
 import { useRef } from 'react'
 
 type CloudsProps = {
+    lerpSpeeds?: number[]
     targetLocations?: THREE.Vector3[]
     props?: ThreeElements['group']
 }
 
-export const Clouds = ({ targetLocations, props }: CloudsProps) => {
+// This component handles the clouds in a group, with targeted locations which the clouds will lerp to
+export const Clouds = ({ lerpSpeeds, targetLocations, props }: CloudsProps) => {
     const cloudRef1 = useRef<THREE.Group>(null!)
     const cloudRef2 = useRef<THREE.Group>(null!)
 

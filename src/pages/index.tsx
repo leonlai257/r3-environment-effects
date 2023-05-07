@@ -1,17 +1,5 @@
-import {
-    AltGrass,
-    Grass,
-    Glass,
-    HeightMap,
-    Clouds,
-    WaterPlane,
-    SkyBox,
-    WorldEnvironment,
-    AnimationType,
-    HtmlAnimation,
-    Tunnel,
-} from '@/components'
-import { Environment, Html, OrbitControls, PerspectiveCamera, Plane, Sky, Sphere, useDetectGPU } from '@react-three/drei'
+import { Grass, Glass, HeightMap, Clouds, WaterPlane, SkyBox, WorldEnvironment, AnimationType, HtmlAnimation, Tunnel } from '@/components'
+import { Billboard, Environment, Html, OrbitControls, PerspectiveCamera, useDetectGPU } from '@react-three/drei'
 import { Suspense, createRef, useState } from 'react'
 import { DepthOfField, EffectComposer } from '@react-three/postprocessing'
 import { invalidate, useFrame, useThree } from '@react-three/fiber'
@@ -77,6 +65,8 @@ const Main = () => {
     const camera = state.camera as THREE.PerspectiveCamera
     const cameraDefaultPosition = new THREE.Vector3(0, 30, -70)
 
+    const orbitsControlRef = createRef<OrbitControls>()
+
     const mapSize = 10
     const GPUTier = useDetectGPU()
     console.log(GPUTier.tier === 0 || GPUTier.isMobile ? 'low-setting' : 'high-setting')
@@ -85,9 +75,16 @@ const Main = () => {
     const [transition, setTransition] = useState<string>('enterScene')
     const [animation, setAnimation] = useState<AnimationType>('enterScene')
 
+    const [isUserInteraction, setUserInteraction] = useState<boolean>(false)
+
     const defaultFocalLength = camera.getFocalLength()
 
     useFrame(() => {
+        if (!isUserInteraction) {
+            console.log('camera', camera.rotation)
+            // camera.rotation
+        }
+
         if (transition === 'enterScene') {
             setTimeout(() => {
                 invalidate()
@@ -131,7 +128,7 @@ const Main = () => {
             <Html
                 as="div"
                 fullscreen
-                zIndexRange={[9999, 0]}
+                zIndexRange={[100, 0]}
                 style={{
                     backgroundColor: 'transparent',
                 }}>
@@ -153,16 +150,19 @@ const Main = () => {
                 {transition !== 'enterScene' && (
                     <group>
                         <Clouds targetLocations={[new THREE.Vector3(50, 20, 80), new THREE.Vector3(-50, 20, 80)]} />
-                        <Glass
-                            ref={glassRef}
-                            onClick={() => onGlassClick()}
-                            targetLocation={new THREE.Vector3(0, 30, 0)}
-                            props={{
-                                position: [0, 100, 0],
-                                rotation: [Math.PI / 2, 0, 0],
-                                scale: [2, 2, 2],
-                            }}
-                        />
+                        <Billboard>
+                            <Glass
+                                ref={glassRef}
+                                onClick={() => onGlassClick()}
+                                lerpSpeed={0.03}
+                                targetLocation={new THREE.Vector3(0, 30, 0)}
+                                props={{
+                                    position: [0, 100, 0],
+                                    rotation: [(Math.PI * 10) / 18, 0, 0],
+                                    scale: [2, 2, 2],
+                                }}
+                            />
+                        </Billboard>
                     </group>
                 )}
 
@@ -200,11 +200,16 @@ const Main = () => {
                 far={1000}
                 position={[cameraDefaultPosition.x, cameraDefaultPosition.y, cameraDefaultPosition.z]}
             />
-            {/* <EffectComposer>
+            <EffectComposer>
                 <DepthOfField focusDistance={0.1} focalLength={0.1} bokehScale={4.0} />
-            </EffectComposer> */}
+            </EffectComposer>
 
-            <OrbitControls enableZoom={true} enableRotate={transition ? false : true} />
+            <OrbitControls
+                ref={orbitsControlRef}
+                enableZoom={true}
+                enableRotate={transition ? false : true}
+                autoRotate={transition ? false : true}
+            />
         </>
     )
 }
