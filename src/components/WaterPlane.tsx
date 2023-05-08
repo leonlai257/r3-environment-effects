@@ -5,6 +5,7 @@ import { Water } from 'three-stdlib'
 
 extend({ Water })
 
+// Declaring the custom Water Plane as a global JSX element
 declare global {
     namespace JSX {
         interface IntrinsicElements {
@@ -18,13 +19,20 @@ interface WaterPlaneProps {
     props?: ThreeElements['mesh']
 }
 
+// A water plane, using the three-stdlib Water shader
 export const WaterPlane = ({ size, props }: WaterPlaneProps) => {
     const ref = useRef<THREE.Mesh>(null!)
     const gl = useThree((state) => state.gl)
+
+    // Load and configure the water normal map
     const waterNormals = useLoader(THREE.TextureLoader, '/normals/waterNormalMap.jpeg')
     waterNormals.wrapS = waterNormals.wrapT = THREE.RepeatWrapping
-    const waterGeometrySize = size * 20
+
+    // Create and configure the water plane geometry
+    const waterGeometrySize = size * 20 // Scaling up the water plane to the height map
     const waterGeometry = useMemo(() => new THREE.PlaneGeometry(waterGeometrySize, waterGeometrySize), [])
+
+    // Create and configure the water plane material
     const config = useMemo(
         () => ({
             textureWidth: 512,
@@ -39,6 +47,9 @@ export const WaterPlane = ({ size, props }: WaterPlaneProps) => {
         }),
         [waterNormals]
     )
-    useFrame((state, delta) => ((ref.current.material as THREE.ShaderMaterial).uniforms.time.value += delta))
+
+    // Update the water shader uniforms for wave effect
+    useFrame((_, delta) => ((ref.current.material as THREE.ShaderMaterial).uniforms.time.value += delta))
+
     return <water ref={ref} args={[waterGeometry, config]} rotation-x={-Math.PI / 2} {...props} />
 }

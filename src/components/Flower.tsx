@@ -3,6 +3,7 @@ import { LayerMaterial, Texture } from 'lamina'
 import { forwardRef } from 'react'
 import { DoubleSide } from 'three'
 
+// Flower component, using instanced mesh and alpha blending
 export const Flower = forwardRef((props, ref) => {
     const { nodes } = useGLTF('/models/flower.glb')
     const map = useTexture('/textures/flowerDiffuse.jpg')

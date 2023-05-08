@@ -8,12 +8,13 @@ type CloudsProps = {
     props?: ThreeElements['group']
 }
 
-// This component handles the clouds in a group, with targeted locations which the clouds will lerp to
+// Cloud component, it handles the clouds in a group
 export const Clouds = ({ lerpSpeeds, targetLocations, props }: CloudsProps) => {
     const cloudRef1 = useRef<THREE.Group>(null!)
     const cloudRef2 = useRef<THREE.Group>(null!)
 
     useFrame(() => {
+        // Moving the clouds to the target locations
         if (targetLocations) {
             if (targetLocations[0] !== cloudRef1.current?.position) {
                 cloudRef1.current?.position.lerp(targetLocations[0], 0.024)

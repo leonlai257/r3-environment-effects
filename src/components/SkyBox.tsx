@@ -1,33 +1,41 @@
 import { Sky } from '@react-three/drei'
-import { useEffect, useState } from 'react'
-import DateTime from 'luxon'
-import getTime from '../pages/api/getTime'
-import { useControls } from 'leva'
+import { DateTime } from 'luxon'
+import { useEffect, useMemo, useState } from 'react'
+import * as THREE from 'three'
 
-type ControlConfig = {
-    value: number
-    min: number
-    max: number
-    step: number
-}
+type SkyPreset = 'morning' | 'afternoon' | 'sunset' | 'night'
 
-type SkyBoxProps = {
-    config: {
-        time: ControlConfig
-    }
-}
+// Sky Box which will return a custom Sky Box based on local time of day
+export const SkyBox = () => {
+    const sunsetSkyBox = useMemo(() => new THREE.CubeTextureLoader().load(['/envMap/sunsetEnvironment.hdr']), [])
 
-export const SkyBox = ({ config }: SkyBoxProps) => {
-    const controls = useControls(config)
-    const [localTime, setLocalTime] = useState(null)
+    const [skyPreset, setSkyPreset] = useState<SkyPreset>('sunset')
 
+    // Set the sky preset based on local time
     useEffect(() => {
-        // fetch('/api/getTime', {
-        //     method: 'GET',
-        // }).then((res) => {
-        //     setLocalTime(res)
-        // })
-    })
+        const localTime = DateTime.now()
+        const hour = localTime.hour
+        if (hour >= 6 && hour < 12) {
+            setSkyPreset('morning')
+        } else if (hour >= 12 && hour < 18) {
+            setSkyPreset('afternoon')
+        } else if (hour >= 18 && hour < 24) {
+            setSkyPreset('sunset')
+        } else if (hour >= 0 && hour < 6) {
+            setSkyPreset('night')
+        }
+    }, [])
 
-    return <Sky distance={45000} inclination={controls.time} azimuth={controls.time} />
+    switch (skyPreset) {
+        case 'morning':
+            return <Sky distance={45000} inclination={1} azimuth={1} />
+        case 'afternoon':
+            return <Sky distance={45000} inclination={1} azimuth={1} />
+        case 'sunset':
+            return <Sky distance={45000} inclination={1} azimuth={1} />
+        case 'night':
+            return <Sky distance={45000} inclination={1} azimuth={1} />
+        default:
+            return <Sky distance={45000} inclination={1} azimuth={1} />
+    }
 }

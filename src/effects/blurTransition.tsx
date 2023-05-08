@@ -8,11 +8,10 @@ import { ShaderPass } from 'three/examples/jsm/postprocessing/ShaderPass'
 import { BlendShader } from 'three/examples/jsm/shaders/BlendShader'
 import { CopyShader } from 'three/examples/jsm/shaders/CopyShader'
 
+// Blur Transition Effect, it uses blend shader to blend the current frame with the previous frame to create a motion blur effect
 const BlurTransition = () => {
     const { scene, gl, size, camera } = useThree()
     const composer = useMemo(() => {
-        // BEGIN vanilla Three.js
-
         const composer = new EffectComposer(gl)
 
         // render pass
@@ -39,7 +38,6 @@ const BlurTransition = () => {
         composer.addPass(savePass)
         composer.addPass(outputPass)
 
-        // END vanilla Three.js
         return composer
     }, [camera, scene, gl, size])
     useEffect(() => void composer.setSize(size.width, size.height), [size, composer])

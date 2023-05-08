@@ -4,6 +4,7 @@ export type HtmlAnimationProps = {
     animation?: AnimationType
 }
 
+// Html animation for transition, using css animation and tailwindcss
 export const HtmlAnimation = ({ animation = 'fadeOut' }: HtmlAnimationProps) => {
     switch (animation) {
         case 'enterScene':

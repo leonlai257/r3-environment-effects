@@ -12,7 +12,5 @@ export type ControlConfigType = {
     frequency: ControlConfig
     exponent: ControlConfig
     octaves: ControlConfig
-    limits: ControlConfig
     strands: ControlConfig
-    time: ControlConfig
 }

@@ -4,38 +4,37 @@ import * as THREE from 'three'
 
 export type TunnelProps = {
     position: [number, number, number]
-    speed?: number
     radius?: number
     length?: number
     props?: ThreeElements['mesh']
 }
 
-export const Tunnel = ({ position, speed = 10, radius = 16, length = 50, props }: TunnelProps) => {
+// A infinite tunnel effect, offsetting a tube geometry's texture to achieve a transition effect
+export const Tunnel = ({ position, radius = 16, length = 7, props }: TunnelProps) => {
     const materialRef = createRef<THREE.MeshBasicMaterial>()
-    const vec = new THREE.Vector3()
     const { mouse, camera } = useThree()
     const cameraOffset: number = 10
 
-    const texture = useLoader(THREE.TextureLoader, '/textures/galaxyTexture.jpeg')
-
+    // On Mounted/First load, initialize the texture
+    const texture = useLoader(THREE.TextureLoader, '/textures/galaxyTexture.jpg')
     useEffect(() => {
         texture.wrapS = THREE.MirroredRepeatWrapping
         texture.wrapT = THREE.MirroredRepeatWrapping
         texture.repeat.set(2, 5)
-        // camera.position.set(0, position[1], 100)
     }, [])
 
+    // Generating the curve for the tunnel
+    const vec = new THREE.Vector3()
     const [curve, setCurve] = useState(() => {
         let points = []
-        for (let i = 0; i < 7; i += 1) {
+        for (let i = 0; i < length; i += 1) {
             points.push(new THREE.Vector3(0, 0, 50 * i))
         }
         return new THREE.CatmullRomCurve3(points)
     })
-    let geometry = new THREE.BufferGeometry().setFromPoints(curve.getPoints(70))
-    let splineMesh = new THREE.Line(geometry, new THREE.LineBasicMaterial())
 
     useFrame(() => {
+        // Mapping some of the curve's points to the mouse position
         setCurve(() => {
             const newCurve = curve.clone()
             newCurve.points[2].x = radius * -mouse.x * 1.5
@@ -44,17 +43,21 @@ export const Tunnel = ({ position, speed = 10, radius = 16, length = 50, props }
             newCurve.points[3].y = 0
             newCurve.points[4].x = radius * (1 - mouse.x)
             newCurve.points[4].y = radius * (1 - mouse.y)
+
+            // Pointing the end of the tube downward, blocking the view of the end of the tunnel
             newCurve.points[6].y = -50
 
             return newCurve
         })
 
+        // Zooming effect, by offsetting and reducing the repeat of the texture
         texture.offset.x += 0.02
         texture.offset.y += 0.005
         if (texture.repeat.x >= 1) {
             texture.repeat.x = texture.repeat.x - 0.002
         }
 
+        // Slowly moving the camera to the tunnel position
         camera.position.lerp(vec.set(-mouse.x * cameraOffset, position[1] - mouse.y * cameraOffset, position[2]), 0.05)
     })
 

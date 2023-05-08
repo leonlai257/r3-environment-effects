@@ -39,33 +39,21 @@ export const DEFAULT_CONTROL_VALUES: ControlConfigType = {
         max: 6,
         step: 1,
     },
-    limits: {
-        value: 0.4,
-        min: 0,
-        max: 1,
-        step: 0.05,
-    },
     strands: {
-        value: 50000,
+        value: 1000,
         min: 0,
         max: 500000,
         step: 100,
     },
-    time: {
-        value: 0.9,
-        min: 0,
-        max: 1,
-        step: 0.05,
-    },
 }
 
 const Main = () => {
+    const orbitsControlRef = createRef<any>()
     const glassRef = createRef<THREE.Mesh>()
+
     const state = useThree()
     const camera = state.camera as THREE.PerspectiveCamera
     const cameraDefaultPosition = new THREE.Vector3(0, 30, -70)
-
-    const orbitsControlRef = createRef<OrbitControls>()
 
     const mapSize = 10
     const GPUTier = useDetectGPU()
@@ -77,12 +65,16 @@ const Main = () => {
 
     const [isUserInteraction, setUserInteraction] = useState<boolean>(false)
 
-    const defaultFocalLength = camera.getFocalLength()
-
     useFrame(() => {
-        if (!isUserInteraction) {
-            console.log('camera', camera.rotation)
-            // camera.rotation
+        if (orbitsControlRef.current) {
+            if (isUserInteraction) {
+                orbitsControlRef.current.autoRotate = false
+                setTimeout(() => {
+                    if (!isUserInteraction) {
+                        orbitsControlRef.current.autoRotate = true
+                    }
+                }, 1000)
+            }
         }
 
         if (transition === 'enterScene') {
@@ -102,16 +94,6 @@ const Main = () => {
                 setAnimation('fadeIn')
             }, 5000)
         }
-
-        // if (transition) {
-        //     camera.setFocalLength(camera.getFocalLength() + 0.5)
-        // }
-        // if (camera.fov <= 30) {
-        //     if (transition === 'room') {
-        //         camera.setFocalLength(defaultFocalLength)
-        //     }
-        //     setTransition('')
-        // }
     })
 
     const onGlassClick = () => {
@@ -146,10 +128,10 @@ const Main = () => {
                         }}
                     />
                 }>
-                <SkyBox config={DEFAULT_CONTROL_VALUES} />
+                <SkyBox />
                 {transition !== 'enterScene' && (
                     <group>
-                        <Clouds targetLocations={[new THREE.Vector3(50, 20, 80), new THREE.Vector3(-50, 20, 80)]} />
+                        {/* <Clouds targetLocations={[new THREE.Vector3(50, 20, 80), new THREE.Vector3(-50, 20, 80)]} /> */}
                         <Billboard>
                             <Glass
                                 ref={glassRef}
@@ -177,7 +159,7 @@ const Main = () => {
                     <HeightMap size={mapSize} config={DEFAULT_CONTROL_VALUES} />
                 </Grass>
                 <Environment preset="sunset" />
-                {/* <WorldEnvironment /> */}
+                <WorldEnvironment />
             </Suspense>
 
             {/* {transition && <BlurTransition />} */}
@@ -186,7 +168,7 @@ const Main = () => {
                 <Tunnel
                     position={[0, 30, 500]}
                     radius={16}
-                    length={50}
+                    length={7}
                     props={{
                         rotation: [-Math.PI, 0, 0],
                     }}
@@ -200,9 +182,9 @@ const Main = () => {
                 far={1000}
                 position={[cameraDefaultPosition.x, cameraDefaultPosition.y, cameraDefaultPosition.z]}
             />
-            <EffectComposer>
+            {/* <EffectComposer>
                 <DepthOfField focusDistance={0.1} focalLength={0.1} bokehScale={4.0} />
-            </EffectComposer>
+            </EffectComposer> */}
 
             <OrbitControls
                 ref={orbitsControlRef}
