@@ -1,6 +1,6 @@
 import { Grass, Glass, HeightMap, Clouds, WaterPlane, SkyBox, WorldEnvironment, AnimationType, HtmlAnimation, Tunnel } from '@/components'
 import { Billboard, Environment, Html, OrbitControls, PerspectiveCamera, useDetectGPU } from '@react-three/drei'
-import { Suspense, createRef, useState } from 'react'
+import { Suspense, createRef, useEffect, useState } from 'react'
 import { DepthOfField, EffectComposer } from '@react-three/postprocessing'
 import { invalidate, useFrame, useThree } from '@react-three/fiber'
 import { ControlConfigType } from '@/types'
@@ -65,28 +65,27 @@ const Main = () => {
 
     const [isUserInteraction, setUserInteraction] = useState<boolean>(false)
 
+    useEffect(() => {
+        setTimeout(() => {
+            setAnimation('leaveTunnelEnterWorld')
+        }, 2700)
+
+        setTimeout(() => {
+            setTransition('')
+            setUserInteraction(true)
+            camera.position.set(cameraDefaultPosition.x, cameraDefaultPosition.y, cameraDefaultPosition.z)
+        }, 3000)
+    }, [])
+
     useFrame(() => {
         if (orbitsControlRef.current) {
             if (isUserInteraction) {
-                orbitsControlRef.current.autoRotate = false
                 setTimeout(() => {
-                    if (!isUserInteraction) {
-                        orbitsControlRef.current.autoRotate = true
+                    if (isUserInteraction) {
+                        setUserInteraction(false)
                     }
                 }, 1000)
             }
-        }
-
-        if (transition === 'enterScene') {
-            setTimeout(() => {
-                invalidate()
-                setAnimation('leaveTunnelEnterWorld')
-            }, 2700)
-
-            setTimeout(() => {
-                setTransition('')
-                camera.position.set(cameraDefaultPosition.x, cameraDefaultPosition.y, cameraDefaultPosition.z)
-            }, 3000)
         }
 
         if (transition === 'room') {
@@ -190,7 +189,9 @@ const Main = () => {
                 ref={orbitsControlRef}
                 enableZoom={true}
                 enableRotate={transition ? false : true}
-                autoRotate={transition ? false : true}
+                autoRotate={isUserInteraction ? false : true}
+                minPolarAngle={transition ? Math.PI - Math.PI : (Math.PI * 8) / 36}
+                maxPolarAngle={transition ? Math.PI : (Math.PI * 16) / 36}
             />
         </>
     )
