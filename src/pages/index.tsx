@@ -60,10 +60,13 @@ const Main = () => {
     console.log(GPUTier.tier === 0 || GPUTier.isMobile ? 'low-setting' : 'high-setting')
 
     const [fov, setFov] = useState(75)
-    const [transition, setTransition] = useState<string>('enterScene')
-    const [animation, setAnimation] = useState<AnimationType>('enterScene')
+    const [transition, setTransition] = useState<string>('')
+    const [animation, setAnimation] = useState<AnimationType>('')
 
-    const [isUserInteraction, setUserInteraction] = useState<boolean>(false)
+    const [autoScroll, setAutoScroll] = useState<boolean>(false)
+
+    const playAutoScroll = () => setAutoScroll(true)
+    const stopAutoScroll = () => setAutoScroll(false)
 
     useEffect(() => {
         setTimeout(() => {
@@ -72,22 +75,12 @@ const Main = () => {
 
         setTimeout(() => {
             setTransition('')
-            setUserInteraction(true)
+            setAutoScroll(true)
             camera.position.set(cameraDefaultPosition.x, cameraDefaultPosition.y, cameraDefaultPosition.z)
         }, 3000)
     }, [])
 
     useFrame(() => {
-        if (orbitsControlRef.current) {
-            if (isUserInteraction) {
-                setTimeout(() => {
-                    if (isUserInteraction) {
-                        setUserInteraction(false)
-                    }
-                }, 1000)
-            }
-        }
-
         if (transition === 'room') {
             setTimeout(() => {
                 setAnimation('fadeIn')
@@ -115,7 +108,7 @@ const Main = () => {
                 }}>
                 <HtmlAnimation animation={animation == '' ? 'enterScene' : animation} />
             </Html>
-            <fog attach="fog" args={['hotpink', 20, 240]} />
+            <fog attach="fog" args={['hotpink', 20, 270]} />
             <Suspense
                 fallback={
                     <Tunnel
@@ -189,9 +182,10 @@ const Main = () => {
                 ref={orbitsControlRef}
                 enableZoom={true}
                 enableRotate={transition ? false : true}
-                autoRotate={isUserInteraction ? false : true}
-                minPolarAngle={transition ? Math.PI - Math.PI : (Math.PI * 8) / 36}
-                maxPolarAngle={transition ? Math.PI : (Math.PI * 16) / 36}
+                autoRotateSpeed={0.5}
+                autoRotate={autoScroll}
+                // minPolarAngle={transition ? Math.PI - Math.PI : (Math.PI * 12) / 36}
+                // maxPolarAngle={transition ? Math.PI : (Math.PI * 14) / 36}
             />
         </>
     )

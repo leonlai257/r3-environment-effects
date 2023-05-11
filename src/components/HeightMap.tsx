@@ -7,6 +7,7 @@ import { ForwardedRef, forwardRef, useEffect, useRef } from 'react'
 import * as THREE from 'three'
 import { BufferAttribute } from 'three'
 import useNoisyVertices from '../hooks/useNoisyVertices'
+import { GradientTexture } from '@react-three/drei'
 
 function remap(x: number, [low1, high1]: number[], [low2, high2]: number[]) {
     return low2 + ((x - low1) * (high2 - low2)) / (high1 - low1)
@@ -59,9 +60,27 @@ export const HeightMap = forwardRef((props: HeightMapProps, ref?: ForwardedRef<T
     const controls = useControls(config)
 
     const planeGeom = useRef<THREE.BufferGeometry>(null!)
+    const stops = [0, 0.4, 1]
+    const colors = ['#fddde6', '#FFC0CB', '#ddddff']
+    const gradientSize = 1024
 
-    // Load the gradient texture and turn it into a shader material
-    const gradientTexture = useLoader(THREE.TextureLoader, '/heightmap/biomeGradientMap.png')
+    // create a 1D gradient canvas
+    const canvas = document.createElement('canvas')
+    canvas.width = 16
+    canvas.height = gradientSize
+    const context = canvas.getContext('2d')
+    const gradient = context.createLinearGradient(0, 0, 0, gradientSize)
+    let i = stops.length
+    while (i--) {
+        gradient.addColorStop(stops[i], colors[i])
+    }
+    context.fillStyle = gradient
+    context.fillRect(0, 0, 16, gradientSize)
+
+    // create a 1D gradient texture from the canvas
+    const gradientTexture = new THREE.CanvasTexture(canvas)
+
+    // const gradientTexture = useLoader(THREE.TextureLoader, '/heightmap/biomeGradientMap.png')
     const GradientMaterial = new THREE.ShaderMaterial({
         uniforms: {
             colorTexture: {

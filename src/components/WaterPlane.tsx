@@ -41,7 +41,7 @@ export const WaterPlane = ({ size, props }: WaterPlaneProps) => {
             sunDirection: new THREE.Vector3(),
             sunColor: 0xffffff,
             waterColor: 0x001e0f,
-            distortionScale: 3.7,
+            distortionScale: 4.2,
             fog: false,
             format: gl.outputEncoding,
         }),
