@@ -4,6 +4,5 @@ import * as THREE from 'three'
 
 // Environment for reflection, using react drei's Environment component
 export const WorldEnvironment = () => {
-    const environmentTexture = useMemo(() => new THREE.CubeTextureLoader().load(['/envMap/sunsetEnvironment.hdr']), [])
-    return <Environment preset={undefined} map={environmentTexture} />
+    return <Environment preset={undefined} files={'/envMap/sunsetEnvironment.hdr'} />
 }

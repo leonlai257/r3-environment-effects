@@ -1,13 +1,11 @@
 import { heightMapFragment, heightMapVertex } from '@/shaders/heightMapShader'
 import { ControlConfigType } from '@/types'
-import { useLoader } from '@react-three/fiber'
 import { useControls } from 'leva'
 import Perlin from 'perlin.js'
 import { ForwardedRef, forwardRef, useEffect, useRef } from 'react'
 import * as THREE from 'three'
 import { BufferAttribute } from 'three'
 import useNoisyVertices from '../hooks/useNoisyVertices'
-import { GradientTexture } from '@react-three/drei'
 
 function remap(x: number, [low1, high1]: number[], [low2, high2]: number[]) {
     return low2 + ((x - low1) * (high2 - low2)) / (high1 - low1)
@@ -37,14 +35,20 @@ const computeGrassDensity = (geometry: THREE.BufferGeometry) => {
 const computeFlowerDensity = (geometry: THREE.BufferGeometry) => {
     const position = geometry.getAttribute('position') as BufferAttribute
     const density = []
-    const vertex = new THREE.Vector3()
+    const normalVector = new THREE.Vector3()
+    const up = new THREE.Vector3(0, 0, 1)
     for (let i = 0; i < position.count; i++) {
-        vertex.fromBufferAttribute(position, i)
-        const p = vertex.clone().multiplyScalar(1)
-        const n = Perlin.simplex3(...p.toArray())
-        let m = THREE.MathUtils.mapLinear(n, -1, 1, 0, 1)
-        if (m > 0.15) m = 0
-        density.push(m)
+        // Get the vertex
+        const n = new THREE.Vector3()
+        n.fromBufferAttribute(position, i)
+        normalVector.set(n.x, n.y, n.z)
+
+        // Get the up vector of the current vertex
+        const dot = normalVector.dot(up)
+
+        // Remap and push the density value based on a threshold
+        const value = dot > 5.2 ? remap(dot, [0.1, 10], [0, 10]) : 0
+        density.push(value)
     }
     return new THREE.Float32BufferAttribute(density, 1)
 }
@@ -80,6 +84,7 @@ export const HeightMap = forwardRef((props: HeightMapProps, ref?: ForwardedRef<T
     // create a 1D gradient texture from the canvas
     const gradientTexture = new THREE.CanvasTexture(canvas)
 
+    // Generate a gradient for texture or you pass your own gradient here
     // const gradientTexture = useLoader(THREE.TextureLoader, '/heightmap/biomeGradientMap.png')
     const GradientMaterial = new THREE.ShaderMaterial({
         uniforms: {
@@ -109,6 +114,7 @@ export const HeightMap = forwardRef((props: HeightMapProps, ref?: ForwardedRef<T
         planeGeom.current.attributes.position.needsUpdate = true
         planeGeom.current.computeVertexNormals()
         planeGeom.current.setAttribute('grassDensity', computeGrassDensity(planeGeom.current))
+        planeGeom.current.setAttribute('flowerDensity', computeFlowerDensity(planeGeom.current))
     }, [vertices, ref, planeGeom])
 
     return (

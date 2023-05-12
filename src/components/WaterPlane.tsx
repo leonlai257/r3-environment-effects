@@ -35,8 +35,8 @@ export const WaterPlane = ({ size, props }: WaterPlaneProps) => {
     // Create and configure the water plane material
     const config = useMemo(
         () => ({
-            textureWidth: 512,
-            textureHeight: 512,
+            textureWidth: 128, // The higher the value, the more detail, default is 512 (lower value to 128 for performance)
+            textureHeight: 128,
             waterNormals,
             sunDirection: new THREE.Vector3(),
             sunColor: 0xffffff,

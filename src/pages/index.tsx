@@ -40,7 +40,7 @@ export const DEFAULT_CONTROL_VALUES: ControlConfigType = {
         step: 1,
     },
     strands: {
-        value: 1000,
+        value: 5000,
         min: 0,
         max: 500000,
         step: 100,
@@ -78,6 +78,10 @@ const Main = () => {
             setAutoScroll(true)
             camera.position.set(cameraDefaultPosition.x, cameraDefaultPosition.y, cameraDefaultPosition.z)
         }, 3000)
+
+        window.addEventListener('message', (event) => {
+            console.log(`Received message: ${event.data}`)
+        })
     }, [])
 
     useFrame(() => {
@@ -123,7 +127,7 @@ const Main = () => {
                 <SkyBox />
                 {transition !== 'enterScene' && (
                     <group>
-                        {/* <Clouds targetLocations={[new THREE.Vector3(50, 20, 80), new THREE.Vector3(-50, 20, 80)]} /> */}
+                        <Clouds targetLocations={[new THREE.Vector3(50, 20, 80), new THREE.Vector3(-50, 20, 80)]} />
                         <Billboard>
                             <Glass
                                 ref={glassRef}
@@ -184,8 +188,8 @@ const Main = () => {
                 enableRotate={transition ? false : true}
                 autoRotateSpeed={0.5}
                 autoRotate={autoScroll}
-                // minPolarAngle={transition ? Math.PI - Math.PI : (Math.PI * 12) / 36}
-                // maxPolarAngle={transition ? Math.PI : (Math.PI * 14) / 36}
+                minPolarAngle={transition ? Math.PI - Math.PI : (Math.PI * 12) / 36}
+                maxPolarAngle={transition ? Math.PI : (Math.PI * 14) / 36}
             />
         </>
     )

@@ -23,7 +23,7 @@ export default function App({ pageProps }: AppProps) {
                 <meta name="React three Environment" content="React three Environment by Leon" />
             </Head>
             <Canvas shadows={'soft'}>
-                <ambientLight intensity={0.1} />
+                <ambientLight intensity={1.0} />
                 <directionalLight intensity={0.5} castShadow shadow-mapSize-height={128} shadow-mapSize-width={128} />
                 <Stats />
                 <Switch>

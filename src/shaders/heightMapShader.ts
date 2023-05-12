@@ -15,7 +15,7 @@ uniform sampler2D colorTexture;
 uniform float height;
 
 void main() {
-  float h = (vPos.z - (-limits))/(limits * height * 8.);
+  float h = (vPos.z - (-limits))/(limits * height * 10.);
   vec4 diffuseColor = texture2D(colorTexture, vec2(vPos.z, h));
   gl_FragColor = vec4(diffuseColor.rgb, 1.0);
 }

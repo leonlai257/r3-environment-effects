@@ -42,25 +42,24 @@ export function Grass({ children, config, ...props }: GrassProps) {
         // Apply rotation and translation to the grass mesh
         grassInstanceRef.current.geometry.applyMatrix4(new THREE.Matrix4().makeRotationX(Math.PI / 2))
         grassInstanceRef.current.geometry.applyMatrix4(new THREE.Matrix4().makeTranslation(0, 0, 0.5))
-
-        // flowerRef.current.geometry.applyMatrix4(new THREE.Matrix4().makeRotationX(Math.PI / 2))
-        // flowerRef.current.geometry.applyMatrix4(new THREE.Matrix4().makeTranslation(0, 0, 0.5))
     }, [])
 
-    useFrame(() => (windLayer.current.time += 0.005))
+    // useFrame(() => (windLayer.current.time += 0.005))
     return (
         <>
             {/* Cloning the children(height map) and passed a forwarded ref so that multiple samplers could reference this geometry for instanced mesh generation */}
             {React.cloneElement(children, { ref: geomRef })}
 
-            {/* <Flower ref={flowerRef} /> */}
+            {/* Flower Mesh */}
+            {/* <Flower ref={flowerRef} />s */}
 
-            {/* The instanced mesh for the grass, which blends 2 shaders into one single material (1 for gradient, 1 for swaying/moving effect) */}
+            {/* Grass Instanced Mesh, which blends 2 shaders into one single material (1 for gradient, 1 for swaying/moving effect) */}
             <instancedMesh ref={grassInstanceRef} args={[undefined, undefined, controls.strands]} castShadow>
                 <coneGeometry args={[0.05, 1.0, 2, 20, false, 0, Math.PI]} />
                 <LayerMaterial side={THREE.DoubleSide} lighting="physical" envMapIntensity={1}>
                     <Depth colorA="#86608E" colorB="#ffddf4" near={0.14} far={1.24} mapping={'world'} />
-                    <windLayer
+                    {/* Disable Wind Layer for performance*/}
+                    {/* <windLayer
                         args={[{ mode: 'multiply' }]}
                         colorA={'#ffddf4'}
                         colorB={'#fddde6'}
@@ -69,7 +68,7 @@ export function Grass({ children, config, ...props }: GrassProps) {
                         length={1.4}
                         sway={0.1}
                         ref={windLayer}
-                    />
+                    /> */}
                 </LayerMaterial>
             </instancedMesh>
             <group>
@@ -100,6 +99,8 @@ export function Grass({ children, config, ...props }: GrassProps) {
                     instances={grassInstanceRef}
                     weight="grassDensity"
                 />
+
+                {/* Flower Sampler*/}
                 {/* <Sampler
                     transform={({ sampledMesh, position, normal, dummy: object }) => {
                         // Set random scaling
@@ -119,7 +120,7 @@ export function Grass({ children, config, ...props }: GrassProps) {
                     }}
                     mesh={geomRef}
                     instances={flowerRef}
-                    weight="density"
+                    weight="flowerDensity"
                 /> */}
             </group>
         </>
