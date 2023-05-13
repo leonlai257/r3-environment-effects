@@ -51,8 +51,7 @@ const Main = () => {
     const orbitsControlRef = createRef<any>()
     const glassRef = createRef<THREE.Mesh>()
 
-    const state = useThree()
-    const camera = state.camera as THREE.PerspectiveCamera
+    const { camera } = useThree()
     const cameraDefaultPosition = new THREE.Vector3(0, 30, -70)
 
     const mapSize = 10
@@ -60,8 +59,8 @@ const Main = () => {
     console.log(GPUTier.tier === 0 || GPUTier.isMobile ? 'low-setting' : 'high-setting')
 
     const [fov, setFov] = useState(75)
-    const [transition, setTransition] = useState<string>('')
-    const [animation, setAnimation] = useState<AnimationType>('')
+    const [transition, setTransition] = useState<string>('enterScene')
+    const [animation, setAnimation] = useState<AnimationType>('enterScene')
 
     const [autoScroll, setAutoScroll] = useState<boolean>(false)
 
@@ -75,12 +74,16 @@ const Main = () => {
 
         setTimeout(() => {
             setTransition('')
-            setAutoScroll(true)
-            camera.position.set(cameraDefaultPosition.x, cameraDefaultPosition.y, cameraDefaultPosition.z)
         }, 3000)
 
         window.addEventListener('message', (event) => {
             console.log(`Received message: ${event.data}`)
+            if (event.data.data === 'playAutoScroll') {
+                playAutoScroll()
+            }
+            if (event.data.data === 'stopAutoScroll') {
+                stopAutoScroll()
+            }
         })
     }, [])
 
@@ -89,6 +92,11 @@ const Main = () => {
             setTimeout(() => {
                 setAnimation('fadeIn')
             }, 5000)
+        }
+
+        if (transition === '' && !autoScroll) {
+            setAutoScroll(true)
+            camera.position.set(cameraDefaultPosition.x, cameraDefaultPosition.y, cameraDefaultPosition.z)
         }
     })
 
