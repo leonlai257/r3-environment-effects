@@ -64,6 +64,8 @@ export const HeightMap = forwardRef((props: HeightMapProps, ref?: ForwardedRef<T
     const controls = useControls(config)
 
     const planeGeom = useRef<THREE.BufferGeometry>(null!)
+
+    // Generate the gradient texture based on these stops and colors (the array length must be the same)
     const stops = [0, 0.4, 1]
     const colors = ['#fddde6', '#FFC0CB', '#ddddff']
     const gradientSize = 1024

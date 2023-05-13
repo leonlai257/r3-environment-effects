@@ -12,19 +12,19 @@ export const SkyBox = () => {
     const [skyPreset, setSkyPreset] = useState<SkyPreset>('sunset')
 
     // Set the sky preset based on local time
-    // useEffect(() => {
-    //     const localTime = DateTime.now()
-    //     const hour = localTime.hour
-    //     if (hour >= 6 && hour < 12) {
-    //         setSkyPreset('morning')
-    //     } else if (hour >= 12 && hour < 18) {
-    //         setSkyPreset('afternoon')
-    //     } else if (hour >= 18 && hour < 24) {
-    //         setSkyPreset('sunset')
-    //     } else if (hour >= 0 && hour < 6) {
-    //         setSkyPreset('night')
-    //     }
-    // }, [])
+    useEffect(() => {
+        const localTime = DateTime.now()
+        const hour = localTime.hour
+        if (hour >= 6 && hour < 12) {
+            setSkyPreset('morning')
+        } else if (hour >= 12 && hour < 18) {
+            setSkyPreset('afternoon')
+        } else if (hour >= 18 && hour < 24) {
+            setSkyPreset('sunset')
+        } else if (hour >= 0 && hour < 6) {
+            setSkyPreset('night')
+        }
+    }, [])
 
     const { scene } = useThree()
 

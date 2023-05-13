@@ -41,8 +41,8 @@ export const Tunnel = ({ position, radius = 16, length = 7, props }: TunnelProps
             newCurve.points[2].y = radius * mouse.y * 1.5
             newCurve.points[3].x = 0
             newCurve.points[3].y = 0
-            newCurve.points[4].x = radius * (1 - mouse.x)
-            newCurve.points[4].y = radius * (1 - mouse.y)
+            newCurve.points[4].x = radius * mouse.x * 1.8
+            newCurve.points[4].y = radius * -mouse.y * 1.8
 
             // Pointing the end of the tube downward, blocking the view of the end of the tunnel
             newCurve.points[6].y = -50

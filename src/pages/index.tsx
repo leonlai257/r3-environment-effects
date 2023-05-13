@@ -40,9 +40,9 @@ export const DEFAULT_CONTROL_VALUES: ControlConfigType = {
         step: 1,
     },
     strands: {
-        value: 5000,
+        value: 50000,
         min: 0,
-        max: 500000,
+        max: 100000,
         step: 100,
     },
 }
@@ -58,11 +58,12 @@ const Main = () => {
     const GPUTier = useDetectGPU()
     console.log(GPUTier.tier === 0 || GPUTier.isMobile ? 'low-setting' : 'high-setting')
 
-    const [fov, setFov] = useState(75)
     const [transition, setTransition] = useState<string>('enterScene')
     const [animation, setAnimation] = useState<AnimationType>('enterScene')
 
+    const [fov, setFov] = useState(75)
     const [autoScroll, setAutoScroll] = useState<boolean>(false)
+    const [firstEnterWorld, setFirstEnterWorld] = useState<boolean>(false)
 
     const playAutoScroll = () => setAutoScroll(true)
     const stopAutoScroll = () => setAutoScroll(false)
@@ -74,10 +75,11 @@ const Main = () => {
 
         setTimeout(() => {
             setTransition('')
+            setFirstEnterWorld(true)
         }, 3000)
 
         window.addEventListener('message', (event) => {
-            console.log(`Received message: ${event.data}`)
+            console.log(`Received message: ${event.data.data}`)
             if (event.data.data === 'playAutoScroll') {
                 playAutoScroll()
             }
@@ -88,15 +90,17 @@ const Main = () => {
     }, [])
 
     useFrame(() => {
+        if (firstEnterWorld) {
+            setAutoScroll(true)
+            setFirstEnterWorld(false)
+            camera.position.set(cameraDefaultPosition.x, cameraDefaultPosition.y, cameraDefaultPosition.z)
+        }
+
+        // When the glass is clicked, set the animation to fade in to white after 5 seconds
         if (transition === 'room') {
             setTimeout(() => {
                 setAnimation('fadeIn')
             }, 5000)
-        }
-
-        if (transition === '' && !autoScroll) {
-            setAutoScroll(true)
-            camera.position.set(cameraDefaultPosition.x, cameraDefaultPosition.y, cameraDefaultPosition.z)
         }
     })
 
@@ -179,6 +183,12 @@ const Main = () => {
                 />
             )}
 
+            {/* Post processing */}
+            <EffectComposer>
+                <DepthOfField focusDistance={0.1} focalLength={0.1} bokehScale={4.0} />
+            </EffectComposer>
+
+            {/* Camera */}
             <PerspectiveCamera
                 makeDefault
                 fov={fov}
@@ -186,13 +196,10 @@ const Main = () => {
                 far={1000}
                 position={[cameraDefaultPosition.x, cameraDefaultPosition.y, cameraDefaultPosition.z]}
             />
-            {/* <EffectComposer>
-                <DepthOfField focusDistance={0.1} focalLength={0.1} bokehScale={4.0} />
-            </EffectComposer> */}
 
             <OrbitControls
                 ref={orbitsControlRef}
-                enableZoom={true}
+                enableZoom={false}
                 enableRotate={transition ? false : true}
                 autoRotateSpeed={0.5}
                 autoRotate={autoScroll}
